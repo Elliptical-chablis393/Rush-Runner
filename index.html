@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RushRunner</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@400;500;700&family=Roboto+Mono:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-glass"> <!-- デフォルトテーマを指定 -->
+
+    <div id="theme-switcher">
+        <button data-theme="glass" class="active">Glass</button>
+        <button data-theme="led">LED</button>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>RushRunner</h1>
+            <p class="description">次の電車まで、あとどれくらい？</p>
+        </header>
+
+        <main>
+            <div id="search-container">
+                
+                <input type="text" id="search-box" placeholder="駅名を入力 (例: 渋谷)">
+                <ul id="search-results"></ul>
+            </div>
+
+            <div id="station-info">
+                <h2 id="station-name"></h2>
+                <p id="direction"></p>
+            </div>
+
+            <div id="countdown">
+                <p class="countdown-label">次の電車</p>
+                <div id="next-train-details">
+                    <span id="next-train-type">---</span>
+                    <span class="separator">|</span>
+                    <span id="next-train-destination">---</span>
+                </div>
+                <div id="timer">--:--</div>
+                <p class="timer-suffix">後に発車</p>
+            </div>
+
+            <div id="rush-alert">
+                <!-- 駆け込みアラートはここに表示されます -->
+            </div>
+
+            <div class="selectors">
+                <button class="active" data-day="weekday">平日</button>
+                <button data-day="holiday">土日祝</button>
+            </div>
+
+            <div class="timetable-container">
+                <h3>時刻表</h3>
+                <table id="timetable">
+                    <thead>
+                        <tr>
+                            <th>種別</th>
+                            <th>行先</th>
+                            <th>発車時刻</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 時刻表データはここに挿入されます -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <div id="debug-controls">
+        <h4>試験用ボタン</h4>
+        <button id="debug-safe">余裕</button>
+        <button id="debug-warning">走れば</button>
+        <button id="debug-danger">無理</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

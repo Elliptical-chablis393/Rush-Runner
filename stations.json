@@ -1,0 +1,126 @@
+{
+    "JR-East.Yamanote.Tokyo": {
+        "stationName": "東京",
+        "lineName": "JR山手線 (内回り)",
+        "latitude": 35.681,
+        "longitude": 139.767,
+        "timetable": {
+            "weekday": [
+                { "hour": 14, "minute": 5, "type": "普通", "destination": "渋谷" },
+                { "hour": 14, "minute": 8, "type": "普通", "destination": "品川" },
+                { "hour": 14, "minute": 12, "type": "普通", "destination": "渋谷" },
+                { "hour": 23, "minute": 50, "type": "普通", "destination": "品川" }
+            ],
+            "holiday": [
+                { "hour": 14, "minute": 7, "type": "普通", "destination": "渋谷" },
+                { "hour": 14, "minute": 11, "type": "普通", "destination": "品川" },
+                { "hour": 23, "minute": 52, "type": "普通", "destination": "品川" }
+            ]
+        }
+    },
+    "JR-East.Yamanote.Shinagawa": {
+        "stationName": "品川",
+        "lineName": "JR山手線 (内回り)",
+        "latitude": 35.6282,
+        "longitude": 139.7391,
+        "timetable": {
+            "weekday": [
+                { "hour": 14, "minute": 15, "type": "普通", "destination": "渋谷" },
+                { "hour": 14, "minute": 18, "type": "普通", "destination": "新宿" },
+                { "hour": 23, "minute": 55, "type": "普通", "destination": "渋谷" }
+            ],
+            "holiday": [
+                { "hour": 14, "minute": 17, "type": "普通", "destination": "渋谷" },
+                { "hour": 14, "minute": 21, "type": "普通", "destination": "新宿" },
+                { "hour": 23, "minute": 58, "type": "普通", "destination": "渋谷" }
+            ]
+        }
+    },
+    "JR-East.Yamanote.Shibuya": {
+        "stationName": "渋谷",
+        "lineName": "JR山手線 (内回り)",
+        "latitude": 35.6581,
+        "longitude": 139.7017,
+        "timetable": {
+            "weekday": [
+                { "hour": 14, "minute": 25, "type": "普通", "destination": "新宿" },
+                { "hour": 14, "minute": 29, "type": "普通", "destination": "池袋" },
+                { "hour": 23, "minute": 59, "type": "普通", "destination": "新宿" }
+            ],
+            "holiday": [
+                { "hour": 14, "minute": 28, "type": "普通", "destination": "新宿" },
+                { "hour": 14, "minute": 32, "type": "普通", "destination": "池袋" }
+            ]
+        }
+    },
+    "JR-West.Biwako.Yamashina": {
+        "stationName": "山科",
+        "lineName": "JR琵琶湖線",
+        "latitude": 34.992,
+        "longitude": 135.817,
+        "timetable": {
+            "weekday": [
+                { "hour": 14, "minute": 5, "type": "新快速", "destination": "姫路" },
+                { "hour": 14, "minute": 20, "type": "新快速", "destination": "網干" },
+                { "hour": 14, "minute": 35, "type": "新快速", "destination": "姫路" }
+            ],
+            "holiday": []
+        }
+    },
+    "JR-West.Kyoto.Osaka": {
+        "stationName": "大阪",
+        "lineName": "JR京都線・神戸線",
+        "latitude": 34.702,
+        "longitude": 135.495,
+        "timetable": {
+            "weekday": [
+                { "hour": 14, "minute": 30, "type": "新快速", "destination": "姫路" },
+                { "hour": 14, "minute": 45, "type": "新快速", "destination": "網干" },
+                { "hour": 15, "minute": 0, "type": "新快速", "destination": "姫路" }
+            ],
+            "holiday": []
+        }
+    },
+    "JR-West.Kobe.Sannomiya": {
+        "stationName": "三ノ宮",
+        "lineName": "JR神戸線",
+        "latitude": 34.6946,
+        "longitude": 135.1952,
+        "timetable": {
+            "weekday": [
+                { "hour": 14, "minute": 52, "type": "新快速", "destination": "姫路" },
+                { "hour": 15, "minute": 7, "type": "新快速", "destination": "網干" },
+                { "hour": 15, "minute": 22, "type": "新快速", "destination": "姫路" }
+            ],
+            "holiday": []
+        }
+    },
+    "JR-West.Kobe.Akashi": {
+        "stationName": "明石",
+        "lineName": "JR神戸線",
+        "latitude": 34.6489,
+        "longitude": 134.9925,
+        "timetable": {
+            "weekday": [
+                { "hour": 15, "minute": 5, "type": "新快速", "destination": "姫路" },
+                { "hour": 15, "minute": 20, "type": "新快速", "destination": "網干" },
+                { "hour": 15, "minute": 35, "type": "新快速", "destination": "姫路" }
+            ],
+            "holiday": []
+        }
+    },
+    "JR-West.Kobe.Himeji": {
+        "stationName": "姫路",
+        "lineName": "JR神戸線",
+        "latitude": 34.8267,
+        "longitude": 134.6909,
+        "timetable": {
+            "weekday": [
+                { "hour": 14, "minute": 10, "type": "新快速", "destination": "野洲" },
+                { "hour": 14, "minute": 25, "type": "新快速", "destination": "米原" },
+                { "hour": 14, "minute": 40, "type": "新快速", "destination": "野洲" }
+            ],
+            "holiday": []
+        }
+    }
+}

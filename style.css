@@ -1,0 +1,246 @@
+/*
+========================================
+  共通 & アニメーション
+========================================
+*/
+
+@keyframes background-pan {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    transition: background 0.8s ease, color 0.5s;
+}
+
+/* --- テーマ切り替えボタン --- */
+#theme-switcher {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 1000;
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    padding: 5px;
+    display: flex;
+    gap: 5px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+#theme-switcher button {
+    background-color: transparent;
+    border: none;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+}
+
+#theme-switcher button.active {
+    background-color: rgba(255,255,255,0.2);
+    font-weight: bold;
+}
+
+#rush-alert {
+    text-align: center;
+    padding: 16px;
+    margin-bottom: 30px;
+    border-radius: 12px;
+    font-size: 1.1em;
+    font-weight: 500;
+    border: 1px solid;
+    transition: all 0.4s ease;
+    opacity: 0;
+    visibility: hidden;
+    min-height: 1.2em; /* 高さを確保 */
+}
+
+#rush-alert.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+/*
+========================================
+  テーマ1: グラスモーフィズム (Glass)
+========================================
+*/
+
+body.theme-glass {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: linear-gradient(125deg, #1d2b41, #15181f, #2c1d3e);
+    background-size: 400% 400%;
+    color: #f0f0f0;
+    animation: background-pan 20s ease infinite;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.theme-glass .container {
+    background: rgba(36, 40, 49, 0.7);
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+    padding: 30px;
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+.theme-glass header {
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+}
+
+.theme-glass h1 { margin: 0; color: #fff; font-weight: 700; font-size: 2em; }
+.theme-glass .description { margin: 5px 0 0; color: #a0a8b5; font-weight: 400; }
+
+.theme-glass #search-container { margin-bottom: 20px; }
+.theme-glass #search-box {
+    width: 100%;
+    padding: 14px;
+    font-size: 1em;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    background-color: rgba(0,0,0,0.2);
+    color: #f0f0f0;
+    box-sizing: border-box;
+    transition: all 0.3s;
+}
+.theme-glass #search-box:focus {
+    outline: none;
+    border-color: #00dec8;
+    background-color: rgba(0,0,0,0.1);
+    box-shadow: 0 0 0 3px rgba(0, 222, 200, 0.3);
+}
+
+.theme-glass #station-info { text-align: center; margin-bottom: 30px; }
+.theme-glass #station-name { margin: 0 0 5px 0; font-size: 2em; color: #fff; font-weight: 700; }
+.theme-glass #direction { margin: 0; color: #a0a8b5; font-size: 1.2em; }
+
+.theme-glass #countdown {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    border-radius: 12px;
+    background: rgba(0,0,0,0.15);
+}
+.theme-glass .countdown-label { margin: 0 0 10px 0; font-size: 1.1em; color: #a0a8b5; }
+.theme-glass #next-train-details { display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 15px; font-size: 1.8em; font-weight: 500; }
+.theme-glass #next-train-type { color: #ffc700; background-color: rgba(255, 199, 0, 0.1); padding: 5px 10px; border-radius: 6px; font-size: 0.8em; font-weight: 700; }
+.theme-glass #next-train-destination { color: #fff; }
+.theme-glass .separator { display: none; }
+.theme-glass #timer { font-size: 4em; font-weight: 700; font-family: 'Roboto Mono', monospace; color: #00dec8; margin-bottom: 8px; text-shadow: 0 0 15px rgba(0, 222, 200, 0.4); }
+.theme-glass .timer-suffix { margin: 0; color: #a0a8b5; }
+
+.theme-glass #rush-alert.safe { color: #2eff7b; border-color: #2eff7b; background-color: rgba(46, 204, 113, 0.15); backdrop-filter: blur(5px); text-shadow: 0 0 10px rgba(46, 255, 123, 0.5); box-shadow: 0 0 15px rgba(46, 255, 123, 0.2); }
+.theme-glass #rush-alert.warning { color: #fce83a; border-color: #fce83a; background-color: rgba(241, 196, 15, 0.15); backdrop-filter: blur(5px); text-shadow: 0 0 10px rgba(252, 232, 58, 0.5); box-shadow: 0 0 15px rgba(252, 232, 58, 0.2); }
+.theme-glass #rush-alert.danger { color: #ff4d4d; border-color: #ff4d4d; background-color: rgba(231, 76, 60, 0.15); backdrop-filter: blur(5px); text-shadow: 0 0 10px rgba(255, 77, 77, 0.5); box-shadow: 0 0 15px rgba(255, 77, 77, 0.2); }
+
+.theme-glass .selectors { display: flex; justify-content: center; margin-bottom: 30px; background-color: rgba(0,0,0,0.2); border-radius: 8px; padding: 5px; }
+.theme-glass .selectors button { flex: 1; background-color: transparent; border: none; padding: 12px 20px; cursor: pointer; font-size: 1em; color: #a0a8b5; transition: all 0.3s ease; border-radius: 6px; font-weight: 500; }
+.theme-glass .selectors button.active { background-color: #00dec8; color: #000; font-weight: 700; box-shadow: 0 2px 8px rgba(0, 222, 200, 0.3); }
+
+.theme-glass .timetable-container { margin-bottom: 20px; }
+.theme-glass #timetable { width: 100%; border-collapse: collapse; background: rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+.theme-glass #timetable th, .theme-glass #timetable td { padding: 15px 18px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.15); }
+.theme-glass #timetable th { font-weight: 500; font-size: 0.9em; color: #a0a8b5; }
+.theme-glass #timetable tbody tr:last-child td { border-bottom: none; }
+.theme-glass #timetable tbody tr:hover { background-color: rgba(255,255,255,0.05); }
+
+.theme-glass #debug-controls { position: fixed; bottom: 10px; right: 10px; background-color: rgba(0, 0, 0, 0.7); color: white; padding: 10px; border-radius: 8px; z-index: 100; }
+.theme-glass #debug-controls h4 { margin: 0 0 10px 0; text-align: center; font-weight: normal; border-bottom: 1px solid #555; padding-bottom: 5px; }
+.theme-glass #debug-controls button { background-color: #555; color: white; border: 1px solid #777; padding: 5px 10px; margin: 0 5px; cursor: pointer; border-radius: 3px; }
+.theme-glass #debug-controls button:hover { background-color: #777; }
+
+
+/*
+========================================
+  テーマ2: LED風 (Hybrid)
+========================================
+*/
+
+body.theme-led {
+    font-family: 'Noto Sans JP', sans-serif;
+    background-color: #111;
+    color: #e5e5e5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.theme-led .container {
+    background-color: #1c1c1c;
+    border: 1px solid #333;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    padding: 30px;
+}
+
+.theme-led header { text-align: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 30px; }
+.theme-led h1 { color: #fff; font-weight: 600; }
+.theme-led .description { color: #888; }
+
+.theme-led #search-container { margin-bottom: 20px; }
+.theme-led #search-box { background-color: #222; border-color: #444; color: #e5e5e5; border-radius: 6px; }
+.theme-led #search-box:focus { border-color: #ff8c00; box-shadow: none; }
+
+.theme-led #station-info { text-align: center; margin-bottom: 30px; }
+.theme-led #station-name { color: #fff; font-weight: 600; }
+.theme-led #direction { color: #888; }
+
+/* --- ここからLED風 --- */
+.theme-led #countdown {
+    font-family: 'DotGothic16', sans-serif;
+    background: #000;
+    padding: 20px;
+    margin-bottom: 30px;
+    border-radius: 10px;
+    border: 2px solid #333;
+    box-shadow: inset 0 0 10px #000;
+    background-image: radial-gradient(circle, #1a1a1a 1px, transparent 1px);
+    background-size: 4px 4px;
+}
+.theme-led .countdown-label { color: #ff8c00; opacity: 0.8; text-shadow: 0 0 3px #ff8c00; }
+.theme-led #next-train-details { color: #ff8c00; text-shadow: 0 0 5px #ff8c00, 0 0 10px #ff8c00, 0 0 15px #ff4500; }
+.theme-led #next-train-type { background: transparent; padding: 0; font-size: 1em; }
+.theme-led #timer { font-family: 'DotGothic16', sans-serif; color: #ff8c00; text-shadow: 0 0 5px #ff8c00, 0 0 10px #ff8c00, 0 0 15px #ff4500; }
+.theme-led .timer-suffix { color: #ff8c00; opacity: 0.8; text-shadow: 0 0 3px #ff8c00; }
+/* --- ここまでLED風 --- */
+
+.theme-led #rush-alert.safe { color: #2eff7b; border-color: #2eff7b; background-color: rgba(46, 204, 113, 0.15); }
+.theme-led #rush-alert.warning { color: #fce83a; border-color: #fce83a; background-color: rgba(241, 196, 15, 0.15); }
+.theme-led #rush-alert.danger { color: #ff4d4d; border-color: #ff4d4d; background-color: rgba(231, 76, 60, 0.15); }
+
+.theme-led .selectors { display: flex; justify-content: center; margin-bottom: 30px; background-color: #222; border-radius: 8px; padding: 5px; }
+.theme-led .selectors button { flex: 1; background-color: transparent; border: none; padding: 12px 20px; cursor: pointer; font-size: 1em; color: #888; transition: all 0.3s ease; border-radius: 6px; font-weight: 500; }
+.theme-led .selectors button.active { background-color: #ff8c00; color: #000; font-weight: 700; box-shadow: none; }
+
+.theme-led .timetable-container { margin-bottom: 20px; }
+.theme-led #timetable { width: 100%; border-collapse: collapse; background: #222; border-radius: 8px; overflow: hidden; }
+.theme-led #timetable th, .theme-led #timetable td { padding: 15px 18px; text-align: left; border-bottom: 1px solid #333; }
+.theme-led #timetable th { color: #888; }
+.theme-led #timetable tbody tr:last-child td { border-bottom: none; }
+.theme-led #timetable tbody tr:hover { background-color: #333; }
+
+.theme-led #debug-controls { position: fixed; bottom: 10px; right: 10px; background-color: rgba(0, 0, 0, 0.7); color: white; padding: 10px; border-radius: 8px; z-index: 100; }
+.theme-led #debug-controls h4 { margin: 0 0 10px 0; text-align: center; font-weight: normal; border-bottom: 1px solid #555; padding-bottom: 5px; }
+.theme-led #debug-controls button { background-color: #555; color: white; border: 1px solid #777; padding: 5px 10px; margin: 0 5px; cursor: pointer; border-radius: 3px; }
+.theme-led #debug-controls button:hover { background-color: #777; }
