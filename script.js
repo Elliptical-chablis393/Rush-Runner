@@ -17,6 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
         timetableBody: document.querySelector('#timetable tbody'),
         dayButtons: document.querySelectorAll('.selectors button'),
         rushAlert: document.getElementById('rush-alert'),
+        alertMessage: document.querySelector('.alert-message'),
+        emergencyLabel: document.querySelector('.emergency-label'),
         nextTrainType: document.getElementById('next-train-type'),
         nextTrainDestination: document.getElementById('next-train-destination'),
         debugSafe: document.getElementById('debug-safe'),
@@ -177,7 +179,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 (error) => {
                     console.warn("現在地を取得できませんでした:", error.message);
-                    elements.rushAlert.textContent = '現在地をONにすると、間に合うか判定できます';
+                    elements.alertMessage.textContent = '現在地をONにすると、間に合うか判定できます';
+                    elements.emergencyLabel.textContent = '';
                     elements.rushAlert.className = 'rush-alert';
                     elements.rushAlert.classList.add('visible');
                 }
@@ -215,8 +218,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 alertClass = 'danger';
             }
 
-            elements.rushAlert.textContent = message;
+            elements.alertMessage.textContent = message;
             elements.rushAlert.className = `rush-alert ${alertClass} visible`;
+
+            // NERV theme specific
+            const currentTheme = localStorage.getItem('rushRunnerTheme');
+            if (currentTheme === 'nerv' && alertClass === 'danger') {
+                elements.emergencyLabel.textContent = 'EMERGENCY';
+            } else {
+                elements.emergencyLabel.textContent = '';
+            }
         },
 
         // --- UI状態管理 ---

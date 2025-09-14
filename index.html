@@ -8,7 +8,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@400;500;700&family=Roboto+Mono:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@400;500;700&family=Roboto+Mono:wght@700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="theme-light"> <!-- デフォルトテーマを指定 -->
@@ -17,6 +17,7 @@
         <button data-theme="light" class="active">Light</button>
         <button data-theme="dark">Dark</button>
         <button data-theme="led">LED</button>
+        <button data-theme="nerv">NERV</button>
     </div>
 
     <div class="container">
@@ -49,7 +50,8 @@
             </div>
 
             <div id="rush-alert">
-                <!-- 駆け込みアラートはここに表示されます -->
+                <span class="emergency-label"></span>
+                <span class="alert-message"></span>
             </div>
 
             <div class="selectors">

@@ -31,6 +31,22 @@
     100% { box-shadow: none; }
 }
 
+@keyframes nerv-warning-pulse {
+    0%, 100% { border-color: #ffff00; color: #ffff00; }
+    50% { border-color: #555; color: #555; }
+}
+
+@keyframes nerv-danger-flash {
+    0%, 100% { background-color: rgba(255, 0, 0, 0.2); border-color: #ff0000; }
+    50% { background-color: rgba(255, 0, 0, 0.1); border-color: #ff0000; }
+}
+
+@keyframes stripe-animation {
+    0% { background-position: 0 0; }
+    100% { background-position: 100px 100px; }
+}
+
+
 body {
     margin: 0;
     padding: 20px;
@@ -94,6 +110,10 @@ body {
 #rush-alert.visible {
     opacity: 1;
     visibility: visible;
+}
+
+.emergency-label {
+    display: none; /* Hide by default */
 }
 
 /*
@@ -400,3 +420,95 @@ body.theme-led {
 .theme-led .timetable-container {
     border: 1px solid #333;
 }
+
+/*
+========================================
+  テーマ4: NERV風 (NERV)
+========================================
+*/
+
+body.theme-nerv {
+    background-color: #000;
+    color: #fff;
+    font-family: 'Orbitron', 'Noto Sans JP', sans-serif;
+    background-image: linear-gradient(rgba(255, 0, 0, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 0, 0, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.theme-nerv .container {
+    background: rgba(0,0,0,0.8);
+    border: 1px solid #ff0000;
+    border-radius: 0;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+    padding: 20px;
+}
+
+.theme-nerv #theme-switcher { background: #000; border: 1px solid #ff0000; }
+.theme-nerv #theme-switcher button { color: #ff0000; font-family: 'Orbitron', sans-serif; }
+.theme-nerv #theme-switcher button.active { background-color: #ff0000; color: #000; }
+
+.theme-nerv header { border-bottom: 1px solid #ff0000; }
+.theme-nerv h1 { color: #ff0000; text-transform: uppercase; }
+.theme-nerv .description { color: #fff; }
+
+.theme-nerv #search-box {
+    background-color: #111;
+    border: 1px solid #ff0000;
+    color: #fff;
+    border-radius: 0;
+    font-family: 'Orbitron', sans-serif;
+}
+.theme-nerv #search-box:focus { box-shadow: 0 0 8px rgba(255, 0, 0, 0.7); border-color: #ff0000; }
+
+.theme-nerv #station-name { color: #ff0000; text-transform: uppercase; }
+.theme-nerv #direction { color: #fff; }
+
+.theme-nerv #countdown {
+    background: repeating-linear-gradient(45deg, #111, #111 10px, #222 10px, #222 20px);
+    border: 1px solid #ff0000;
+    border-radius: 0;
+}
+.theme-nerv .countdown-label { color: #fff; text-transform: uppercase; }
+.theme-nerv #next-train-details { color: #fff; }
+.theme-nerv #next-train-type { background-color: #ff0000; color: #000; padding: 2px 8px; border-radius: 0; text-transform: uppercase; }
+.theme-nerv #timer { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
+.theme-nerv .timer-suffix { color: #fff; }
+
+.theme-nerv #rush-alert { border-radius: 0; padding-top: 5px; padding-bottom: 5px; }
+.theme-nerv #rush-alert.safe { color: #00ff00; border-color: #00ff00; background-color: rgba(0, 255, 0, 0.1); }
+.theme-nerv #rush-alert.warning { color: #ffff00; border-color: #ffff00; background-color: rgba(255, 255, 0, 0.1); animation: nerv-warning-pulse 1.5s infinite; }
+.theme-nerv #rush-alert.danger { color: #ff0000; border-color: #ff0000; background-color: rgba(255, 0, 0, 0.1); animation: nerv-danger-flash 0.5s infinite; }
+
+.theme-nerv #rush-alert.visible {
+    background-image:
+        repeating-linear-gradient(-45deg,
+            #ff0, #ff0 10px, /* Yellow */
+            #000, #000 20px /* Black */
+        );
+    background-size: 40px 40px;
+    animation: stripe-animation 1s linear infinite;
+}
+
+.theme-nerv .emergency-label {
+    display: none;
+    font-size: 1.2em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+.theme-nerv #rush-alert.danger .emergency-label {
+    display: block;
+}
+
+.theme-nerv .selectors { background-color: #111; border-radius: 0; }
+.theme-nerv .selectors button { color: #ff0000; }
+.theme-nerv .selectors button.active { background-color: #ff0000; color: #000; border-radius: 0; }
+
+.theme-nerv .timetable-header { border-bottom: 1px solid #ff0000; }
+.theme-nerv .timetable-container { border-radius: 0; border: 1px solid #ff0000; }
+.theme-nerv #timetable { background: #000; }
+.theme-nerv #timetable th, .theme-nerv #timetable td { border-bottom: 1px solid #ff0000; }
+.theme-nerv #timetable th { color: #ff0000; text-transform: uppercase; }
+.theme-nerv #timetable tbody tr:hover { background-color: #330000; }
