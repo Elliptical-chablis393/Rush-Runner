@@ -11,10 +11,11 @@
     <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@400;500;700&family=Roboto+Mono:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="theme-glass"> <!-- デフォルトテーマを指定 -->
+<body class="theme-light"> <!-- デフォルトテーマを指定 -->
 
     <div id="theme-switcher">
-        <button data-theme="glass" class="active">Glass</button>
+        <button data-theme="light" class="active">Light</button>
+        <button data-theme="dark">Dark</button>
         <button data-theme="led">LED</button>
     </div>
 
@@ -56,20 +57,25 @@
                 <button data-day="holiday">土日祝</button>
             </div>
 
-            <div class="timetable-container">
-                <h3>時刻表</h3>
-                <table id="timetable">
-                    <thead>
-                        <tr>
-                            <th>種別</th>
-                            <th>行先</th>
-                            <th>発車時刻</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- 時刻表データはここに挿入されます -->
-                    </tbody>
-                </table>
+            <div class="timetable-wrapper">
+                <div id="timetable-header" class="timetable-header">
+                    <h3>時刻表</h3>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="timetable-container">
+                    <table id="timetable">
+                        <thead>
+                            <tr>
+                                <th>種別</th>
+                                <th>行先</th>
+                                <th>発車時刻</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 時刻表データはここに挿入されます -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </main>
     </div>

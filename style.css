@@ -23,6 +23,19 @@ body {
     align-items: center;
     min-height: 100vh;
     transition: background 0.8s ease, color 0.5s;
+
+    font-family: 'Noto Sans JP', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+    width: 90%;
+    max-width: 600px;
+    padding: 30px;
+    border-radius: 16px;
+    animation: fadeIn 0.8s ease-out forwards;
+    transition: background 0.5s, border 0.5s, box-shadow 0.5s;
 }
 
 /* --- テーマ切り替えボタン --- */
@@ -31,29 +44,21 @@ body {
     top: 15px;
     right: 15px;
     z-index: 1000;
-    background: rgba(0,0,0,0.3);
     border-radius: 8px;
     padding: 5px;
     display: flex;
     gap: 5px;
-    border: 1px solid rgba(255,255,255,0.1);
 }
 
 #theme-switcher button {
-    background-color: transparent;
     border: none;
-    color: #fff;
     padding: 8px 12px;
     border-radius: 6px;
     cursor: pointer;
     font-family: 'Noto Sans JP', sans-serif;
     font-size: 0.9em;
     transition: all 0.3s ease;
-}
-
-#theme-switcher button.active {
-    background-color: rgba(255,255,255,0.2);
-    font-weight: bold;
+    font-weight: 500;
 }
 
 #rush-alert {
@@ -75,172 +80,307 @@ body {
     visibility: visible;
 }
 
-
 /*
 ========================================
-  テーマ1: グラスモーフィズム (Glass)
+  テーマ1: ライト (Light)
 ========================================
 */
 
-body.theme-glass {
-    font-family: 'Noto Sans JP', sans-serif;
-    background: linear-gradient(125deg, #1d2b41, #15181f, #2c1d3e);
-    background-size: 400% 400%;
-    color: #f0f0f0;
-    animation: background-pan 20s ease infinite;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+body.theme-light {
+    background-color: #f4f7f9;
+    color: #333;
 }
 
-.theme-glass .container {
-    background: rgba(36, 40, 49, 0.7);
-    backdrop-filter: blur(12px) saturate(150%);
-    -webkit-backdrop-filter: blur(12px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 16px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
-    padding: 30px;
-    animation: fadeIn 0.8s ease-out forwards;
+.theme-light .container {
+    background-color: #ffffff;
+    border: 1px solid #e0e5ea;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
 }
 
-.theme-glass header {
+.theme-light #theme-switcher {
+    background: #fff;
+    border: 1px solid #e0e5ea;
+}
+
+.theme-light #theme-switcher button {
+    background-color: transparent;
+    color: #555;
+}
+
+.theme-light #theme-switcher button.active {
+    background-color: #007aff;
+    color: #fff;
+}
+
+.theme-light header {
     text-align: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    border-bottom: 1px solid #e0e5ea;
     padding-bottom: 15px;
     margin-bottom: 30px;
 }
 
-.theme-glass h1 { margin: 0; color: #fff; font-weight: 700; font-size: 2em; }
-.theme-glass .description { margin: 5px 0 0; color: #a0a8b5; font-weight: 400; }
+.theme-light h1 { margin: 0; color: #111; font-weight: 700; font-size: 2em; }
+.theme-light .description { margin: 5px 0 0; color: #667; font-weight: 400; }
 
-.theme-glass #search-container { margin-bottom: 20px; }
-.theme-glass #search-box {
+.theme-light #search-box {
     width: 100%;
     padding: 14px;
     font-size: 1em;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid #ccc;
     border-radius: 8px;
+    background-color: #f9fafb;
+    color: #333;
+    box-sizing: border-box;
+}
+.theme-light #search-box:focus {
+    outline: none;
+    border-color: #007aff;
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+}
+
+.theme-light #station-name { margin: 0 0 5px 0; font-size: 2em; color: #111; font-weight: 700; }
+.theme-light #direction { margin: 0; color: #555; font-size: 1.2em; }
+
+.theme-light #countdown {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    border-radius: 12px;
+    background: #f9fafb;
+    border: 1px solid #e0e5ea;
+}
+.theme-light .countdown-label { color: #667; }
+.theme-light #next-train-details { font-size: 1.8em; font-weight: 500; color: #111; }
+.theme-light #next-train-type { color: #d9480f; background-color: #fff4e6; }
+.theme-light #timer { color: #007aff; text-shadow: none; }
+.theme-light .timer-suffix { color: #667; }
+
+.theme-light #rush-alert.safe { color: #28a745; border-color: #28a745; background-color: #e9f7ec; }
+.theme-light #rush-alert.warning { color: #ffc107; border-color: #ffc107; background-color: #fff9e6; }
+.theme-light #rush-alert.danger { color: #dc3545; border-color: #dc3545; background-color: #fbebed; }
+
+.theme-light .selectors { background-color: #e9ecef; }
+.theme-light .selectors button { color: #555; }
+.theme-light .selectors button.active { background-color: #007aff; color: #fff; box-shadow: 0 2px 8px rgba(0, 122, 255, 0.2); }
+
+.theme-light #timetable { background: #fff; border: 1px solid #e0e5ea; }
+.theme-light #timetable th, .theme-light #timetable td { border-bottom: 1px solid #e9ecef; }
+.theme-light #timetable th { color: #667; }
+.theme-light #timetable tbody tr:hover { background-color: #f9fafb; }
+
+/*
+========================================
+  テーマ2: ダーク (Dark) - 旧Glass
+========================================
+*/
+
+body.theme-dark {
+    background: linear-gradient(125deg, #1d2b41, #15181f, #2c1d3e);
+    background-size: 400% 400%;
+    color: #f0f0f0;
+    animation: background-pan 20s ease infinite;
+}
+
+.theme-dark .container {
+    background: rgba(36, 40, 49, 0.7);
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+}
+
+.theme-dark #theme-switcher {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.theme-dark #theme-switcher button {
+    background-color: transparent;
+    color: #fff;
+}
+
+.theme-dark #theme-switcher button.active {
+    background-color: rgba(255,255,255,0.2);
+}
+
+.theme-dark header { border-bottom: 1px solid rgba(255, 255, 255, 0.15); }
+.theme-dark h1 { color: #fff; }
+.theme-dark .description { color: #a0a8b5; }
+
+.theme-dark #search-box {
+    border: 1px solid rgba(255, 255, 255, 0.15);
     background-color: rgba(0,0,0,0.2);
     color: #f0f0f0;
-    box-sizing: border-box;
-    transition: all 0.3s;
 }
-.theme-glass #search-box:focus {
-    outline: none;
+.theme-dark #search-box:focus {
     border-color: #00dec8;
     background-color: rgba(0,0,0,0.1);
     box-shadow: 0 0 0 3px rgba(0, 222, 200, 0.3);
 }
 
-.theme-glass #station-info { text-align: center; margin-bottom: 30px; }
-.theme-glass #station-name { margin: 0 0 5px 0; font-size: 2em; color: #fff; font-weight: 700; }
-.theme-glass #direction { margin: 0; color: #a0a8b5; font-size: 1.2em; }
+.theme-dark #station-name { color: #fff; }
+.theme-dark #direction { color: #a0a8b5; }
 
-.theme-glass #countdown {
-    text-align: center;
-    margin-bottom: 30px;
-    padding: 20px;
-    border-radius: 12px;
+.theme-dark #countdown {
     background: rgba(0,0,0,0.15);
 }
-.theme-glass .countdown-label { margin: 0 0 10px 0; font-size: 1.1em; color: #a0a8b5; }
-.theme-glass #next-train-details { display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 15px; font-size: 1.8em; font-weight: 500; }
-.theme-glass #next-train-type { color: #ffc700; background-color: rgba(255, 199, 0, 0.1); padding: 5px 10px; border-radius: 6px; font-size: 0.8em; font-weight: 700; }
-.theme-glass #next-train-destination { color: #fff; }
-.theme-glass .separator { display: none; }
-.theme-glass #timer { font-size: 4em; font-weight: 700; font-family: 'Roboto Mono', monospace; color: #00dec8; margin-bottom: 8px; text-shadow: 0 0 15px rgba(0, 222, 200, 0.4); }
-.theme-glass .timer-suffix { margin: 0; color: #a0a8b5; }
+.theme-dark .countdown-label { color: #a0a8b5; }
+.theme-dark #next-train-details { color: #fff; }
+.theme-dark #next-train-type { color: #ffc700; background-color: rgba(255, 199, 0, 0.1); }
+.theme-dark #timer { color: #00dec8; text-shadow: 0 0 15px rgba(0, 222, 200, 0.4); }
+.theme-dark .timer-suffix { color: #a0a8b5; }
 
-.theme-glass #rush-alert.safe { color: #2eff7b; border-color: #2eff7b; background-color: rgba(46, 204, 113, 0.15); backdrop-filter: blur(5px); text-shadow: 0 0 10px rgba(46, 255, 123, 0.5); box-shadow: 0 0 15px rgba(46, 255, 123, 0.2); }
-.theme-glass #rush-alert.warning { color: #fce83a; border-color: #fce83a; background-color: rgba(241, 196, 15, 0.15); backdrop-filter: blur(5px); text-shadow: 0 0 10px rgba(252, 232, 58, 0.5); box-shadow: 0 0 15px rgba(252, 232, 58, 0.2); }
-.theme-glass #rush-alert.danger { color: #ff4d4d; border-color: #ff4d4d; background-color: rgba(231, 76, 60, 0.15); backdrop-filter: blur(5px); text-shadow: 0 0 10px rgba(255, 77, 77, 0.5); box-shadow: 0 0 15px rgba(255, 77, 77, 0.2); }
+.theme-dark #rush-alert.safe { color: #2eff7b; border-color: #2eff7b; background-color: rgba(46, 204, 113, 0.15); }
+.theme-dark #rush-alert.warning { color: #fce83a; border-color: #fce83a; background-color: rgba(241, 196, 15, 0.15); }
+.theme-dark #rush-alert.danger { color: #ff4d4d; border-color: #ff4d4d; background-color: rgba(231, 76, 60, 0.15); }
 
-.theme-glass .selectors { display: flex; justify-content: center; margin-bottom: 30px; background-color: rgba(0,0,0,0.2); border-radius: 8px; padding: 5px; }
-.theme-glass .selectors button { flex: 1; background-color: transparent; border: none; padding: 12px 20px; cursor: pointer; font-size: 1em; color: #a0a8b5; transition: all 0.3s ease; border-radius: 6px; font-weight: 500; }
-.theme-glass .selectors button.active { background-color: #00dec8; color: #000; font-weight: 700; box-shadow: 0 2px 8px rgba(0, 222, 200, 0.3); }
+.theme-dark .selectors { background-color: rgba(0,0,0,0.2); }
+.theme-dark .selectors button { color: #a0a8b5; }
+.theme-dark .selectors button.active { background-color: #00dec8; color: #000; box-shadow: 0 2px 8px rgba(0, 222, 200, 0.3); }
 
-.theme-glass .timetable-container { margin-bottom: 20px; }
-.theme-glass #timetable { width: 100%; border-collapse: collapse; background: rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
-.theme-glass #timetable th, .theme-glass #timetable td { padding: 15px 18px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.15); }
-.theme-glass #timetable th { font-weight: 500; font-size: 0.9em; color: #a0a8b5; }
-.theme-glass #timetable tbody tr:last-child td { border-bottom: none; }
-.theme-glass #timetable tbody tr:hover { background-color: rgba(255,255,255,0.05); }
-
-.theme-glass #debug-controls { position: fixed; bottom: 10px; right: 10px; background-color: rgba(0, 0, 0, 0.7); color: white; padding: 10px; border-radius: 8px; z-index: 100; }
-.theme-glass #debug-controls h4 { margin: 0 0 10px 0; text-align: center; font-weight: normal; border-bottom: 1px solid #555; padding-bottom: 5px; }
-.theme-glass #debug-controls button { background-color: #555; color: white; border: 1px solid #777; padding: 5px 10px; margin: 0 5px; cursor: pointer; border-radius: 3px; }
-.theme-glass #debug-controls button:hover { background-color: #777; }
-
+.theme-dark #timetable { background: rgba(0,0,0,0.1); }
+.theme-dark #timetable th, .theme-dark #timetable td { border-bottom: 1px solid rgba(255, 255, 255, 0.15); }
+.theme-dark #timetable th { color: #a0a8b5; }
+.theme-dark #timetable tbody tr:hover { background-color: rgba(255,255,255,0.05); }
 
 /*
 ========================================
-  テーマ2: LED風 (Hybrid)
+  テーマ3: LED風 (LED)
 ========================================
 */
 
 body.theme-led {
-    font-family: 'Noto Sans JP', sans-serif;
     background-color: #111;
     color: #e5e5e5;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
 }
 
 .theme-led .container {
     background-color: #1c1c1c;
     border: 1px solid #333;
-    border-radius: 12px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-    padding: 30px;
 }
 
-.theme-led header { text-align: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 30px; }
-.theme-led h1 { color: #fff; font-weight: 600; }
+.theme-led #theme-switcher { background: #000; border: 1px solid #333; }
+.theme-led #theme-switcher button { color: #888; }
+.theme-led #theme-switcher button.active { background-color: #ff8c00; color: #000; }
+
+.theme-led header { border-bottom: 1px solid #333; }
+.theme-led h1 { color: #fff; }
 .theme-led .description { color: #888; }
 
-.theme-led #search-container { margin-bottom: 20px; }
-.theme-led #search-box { background-color: #222; border-color: #444; color: #e5e5e5; border-radius: 6px; }
+.theme-led #search-box { background-color: #222; border-color: #444; color: #e5e5e5; }
 .theme-led #search-box:focus { border-color: #ff8c00; box-shadow: none; }
 
-.theme-led #station-info { text-align: center; margin-bottom: 30px; }
-.theme-led #station-name { color: #fff; font-weight: 600; }
+.theme-led #station-name { color: #fff; }
 .theme-led #direction { color: #888; }
 
-/* --- ここからLED風 --- */
 .theme-led #countdown {
     font-family: 'DotGothic16', sans-serif;
     background: #000;
-    padding: 20px;
-    margin-bottom: 30px;
-    border-radius: 10px;
     border: 2px solid #333;
     box-shadow: inset 0 0 10px #000;
     background-image: radial-gradient(circle, #1a1a1a 1px, transparent 1px);
     background-size: 4px 4px;
 }
-.theme-led .countdown-label { color: #ff8c00; opacity: 0.8; text-shadow: 0 0 3px #ff8c00; }
+.theme-led .countdown-label { color: #ff8c00; text-shadow: 0 0 3px #ff8c00; }
 .theme-led #next-train-details { color: #ff8c00; text-shadow: 0 0 5px #ff8c00, 0 0 10px #ff8c00, 0 0 15px #ff4500; }
 .theme-led #next-train-type { background: transparent; padding: 0; font-size: 1em; }
 .theme-led #timer { font-family: 'DotGothic16', sans-serif; color: #ff8c00; text-shadow: 0 0 5px #ff8c00, 0 0 10px #ff8c00, 0 0 15px #ff4500; }
-.theme-led .timer-suffix { color: #ff8c00; opacity: 0.8; text-shadow: 0 0 3px #ff8c00; }
-/* --- ここまでLED風 --- */
+.theme-led .timer-suffix { color: #ff8c00; text-shadow: 0 0 3px #ff8c00; }
 
 .theme-led #rush-alert.safe { color: #2eff7b; border-color: #2eff7b; background-color: rgba(46, 204, 113, 0.15); }
 .theme-led #rush-alert.warning { color: #fce83a; border-color: #fce83a; background-color: rgba(241, 196, 15, 0.15); }
 .theme-led #rush-alert.danger { color: #ff4d4d; border-color: #ff4d4d; background-color: rgba(231, 76, 60, 0.15); }
 
-.theme-led .selectors { display: flex; justify-content: center; margin-bottom: 30px; background-color: #222; border-radius: 8px; padding: 5px; }
-.theme-led .selectors button { flex: 1; background-color: transparent; border: none; padding: 12px 20px; cursor: pointer; font-size: 1em; color: #888; transition: all 0.3s ease; border-radius: 6px; font-weight: 500; }
-.theme-led .selectors button.active { background-color: #ff8c00; color: #000; font-weight: 700; box-shadow: none; }
+.theme-led .selectors { background-color: #222; }
+.theme-led .selectors button { color: #888; }
+.theme-led .selectors button.active { background-color: #ff8c00; color: #000; box-shadow: none; }
 
-.theme-led .timetable-container { margin-bottom: 20px; }
-.theme-led #timetable { width: 100%; border-collapse: collapse; background: #222; border-radius: 8px; overflow: hidden; }
-.theme-led #timetable th, .theme-led #timetable td { padding: 15px 18px; text-align: left; border-bottom: 1px solid #333; }
+.theme-led #timetable { background: #222; }
+.theme-led #timetable th, .theme-led #timetable td { border-bottom: 1px solid #333; }
 .theme-led #timetable th { color: #888; }
-.theme-led #timetable tbody tr:last-child td { border-bottom: none; }
 .theme-led #timetable tbody tr:hover { background-color: #333; }
 
-.theme-led #debug-controls { position: fixed; bottom: 10px; right: 10px; background-color: rgba(0, 0, 0, 0.7); color: white; padding: 10px; border-radius: 8px; z-index: 100; }
-.theme-led #debug-controls h4 { margin: 0 0 10px 0; text-align: center; font-weight: normal; border-bottom: 1px solid #555; padding-bottom: 5px; }
-.theme-led #debug-controls button { background-color: #555; color: white; border: 1px solid #777; padding: 5px 10px; margin: 0 5px; cursor: pointer; border-radius: 3px; }
-.theme-led #debug-controls button:hover { background-color: #777; }
+/* --- 共通のデバッグボタン --- */
+#debug-controls {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    z-index: 100;
+}
+#debug-controls h4 {
+    margin: 0 0 10px 0;
+    text-align: center;
+    font-weight: normal;
+    border-bottom: 1px solid #555;
+    padding-bottom: 5px;
+}
+#debug-controls button {
+    background-color: #555;
+    color: white;
+    border: 1px solid #777;
+    padding: 5px 10px;
+    margin: 0 5px;
+    cursor: pointer;
+    border-radius: 3px;
+}
+#debug-controls button:hover { background-color: #777; }
+
+/*
+========================================
+  時刻表の折りたたみとスクロール
+========================================
+*/
+
+.timetable-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 10px 0;
+    user-select: none;
+}
+
+.timetable-header h3 {
+    margin: 0;
+    font-size: 1.2em;
+}
+
+.toggle-icon {
+    font-size: 1.2em;
+    transition: transform 0.3s ease;
+}
+
+.timetable-wrapper.collapsed .toggle-icon {
+    transform: rotate(-90deg);
+}
+
+.timetable-container {
+    max-height: 300px; /* 約5-6行分 + ヘッダー */
+    overflow-y: auto;
+    transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out;
+    border-radius: 8px;
+}
+
+.timetable-wrapper.collapsed .timetable-container {
+    max-height: 0;
+    overflow: hidden;
+}
+
+/* 各テーマの時刻表コンテナの調整 */
+.theme-light .timetable-container {
+    border: 1px solid #e0e5ea;
+}
+
+.theme-dark .timetable-container {
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.theme-led .timetable-container {
+    border: 1px solid #333;
+}

@@ -9,6 +9,17 @@
                 { "hour": 14, "minute": 5, "type": "普通", "destination": "渋谷" },
                 { "hour": 14, "minute": 8, "type": "普通", "destination": "品川" },
                 { "hour": 14, "minute": 12, "type": "普通", "destination": "渋谷" },
+                { "hour": 14, "minute": 16, "type": "普通", "destination": "品川" },
+                { "hour": 14, "minute": 20, "type": "普通", "destination": "渋谷" },
+                { "hour": 14, "minute": 24, "type": "普通", "destination": "品川" },
+                { "hour": 14, "minute": 28, "type": "普通", "destination": "渋谷" },
+                { "hour": 14, "minute": 32, "type": "普通", "destination": "品川" },
+                { "hour": 14, "minute": 36, "type": "普通", "destination": "渋谷" },
+                { "hour": 14, "minute": 40, "type": "普通", "destination": "品川" },
+                { "hour": 14, "minute": 44, "type": "普通", "destination": "渋谷" },
+                { "hour": 14, "minute": 48, "type": "普通", "destination": "品川" },
+                { "hour": 14, "minute": 52, "type": "普通", "destination": "渋谷" },
+                { "hour": 14, "minute": 56, "type": "普通", "destination": "品川" },
                 { "hour": 23, "minute": 50, "type": "普通", "destination": "品川" }
             ],
             "holiday": [
@@ -27,6 +38,12 @@
             "weekday": [
                 { "hour": 14, "minute": 15, "type": "普通", "destination": "渋谷" },
                 { "hour": 14, "minute": 18, "type": "普通", "destination": "新宿" },
+                { "hour": 14, "minute": 22, "type": "普通", "destination": "渋谷" },
+                { "hour": 14, "minute": 26, "type": "普通", "destination": "新宿" },
+                { "hour": 14, "minute": 30, "type": "普通", "destination": "渋谷" },
+                { "hour": 14, "minute": 34, "type": "普通", "destination": "新宿" },
+                { "hour": 14, "minute": 38, "type": "普通", "destination": "渋谷" },
+                { "hour": 14, "minute": 42, "type": "普通", "destination": "新宿" },
                 { "hour": 23, "minute": 55, "type": "普通", "destination": "渋谷" }
             ],
             "holiday": [
@@ -45,6 +62,12 @@
             "weekday": [
                 { "hour": 14, "minute": 25, "type": "普通", "destination": "新宿" },
                 { "hour": 14, "minute": 29, "type": "普通", "destination": "池袋" },
+                { "hour": 14, "minute": 33, "type": "普通", "destination": "新宿" },
+                { "hour": 14, "minute": 37, "type": "普通", "destination": "池袋" },
+                { "hour": 14, "minute": 41, "type": "普通", "destination": "新宿" },
+                { "hour": 14, "minute": 45, "type": "普通", "destination": "池袋" },
+                { "hour": 14, "minute": 49, "type": "普通", "destination": "新宿" },
+                { "hour": 14, "minute": 53, "type": "普通", "destination": "池袋" },
                 { "hour": 23, "minute": 59, "type": "普通", "destination": "新宿" }
             ],
             "holiday": [
@@ -62,7 +85,9 @@
             "weekday": [
                 { "hour": 14, "minute": 5, "type": "新快速", "destination": "姫路" },
                 { "hour": 14, "minute": 20, "type": "新快速", "destination": "網干" },
-                { "hour": 14, "minute": 35, "type": "新快速", "destination": "姫路" }
+                { "hour": 14, "minute": 35, "type": "新快速", "destination": "姫路" },
+                { "hour": 14, "minute": 50, "type": "新快速", "destination": "網干" },
+                { "hour": 15, "minute": 5, "type": "新快速", "destination": "姫路" }
             ],
             "holiday": []
         }
@@ -76,7 +101,9 @@
             "weekday": [
                 { "hour": 14, "minute": 30, "type": "新快速", "destination": "姫路" },
                 { "hour": 14, "minute": 45, "type": "新快速", "destination": "網干" },
-                { "hour": 15, "minute": 0, "type": "新快速", "destination": "姫路" }
+                { "hour": 15, "minute": 0, "type": "新快速", "destination": "姫路" },
+                { "hour": 15, "minute": 15, "type": "新快速", "destination": "網干" },
+                { "hour": 15, "minute": 30, "type": "新快速", "destination": "姫路" }
             ],
             "holiday": []
         }
@@ -90,7 +117,9 @@
             "weekday": [
                 { "hour": 14, "minute": 52, "type": "新快速", "destination": "姫路" },
                 { "hour": 15, "minute": 7, "type": "新快速", "destination": "網干" },
-                { "hour": 15, "minute": 22, "type": "新快速", "destination": "姫路" }
+                { "hour": 15, "minute": 22, "type": "新快速", "destination": "姫路" },
+                { "hour": 15, "minute": 37, "type": "新快速", "destination": "網干" },
+                { "hour": 15, "minute": 52, "type": "新快速", "destination": "姫路" }
             ],
             "holiday": []
         }
@@ -104,7 +133,8 @@
             "weekday": [
                 { "hour": 15, "minute": 5, "type": "新快速", "destination": "姫路" },
                 { "hour": 15, "minute": 20, "type": "新快速", "destination": "網干" },
-                { "hour": 15, "minute": 35, "type": "新快速", "destination": "姫路" }
+                { "hour": 15, "minute": 35, "type": "新快速", "destination": "姫路" },
+                { "hour": 15, "minute": 50, "type": "新快速", "destination": "網干" }
             ],
             "holiday": []
         }
@@ -118,7 +148,9 @@
             "weekday": [
                 { "hour": 14, "minute": 10, "type": "新快速", "destination": "野洲" },
                 { "hour": 14, "minute": 25, "type": "新快速", "destination": "米原" },
-                { "hour": 14, "minute": 40, "type": "新快速", "destination": "野洲" }
+                { "hour": 14, "minute": 40, "type": "新快速", "destination": "野洲" },
+                { "hour": 14, "minute": 55, "type": "新快速", "destination": "米原" },
+                { "hour": 15, "minute": 10, "type": "新快速", "destination": "野洲" }
             ],
             "holiday": []
         }
