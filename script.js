@@ -4,6 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
         walk: 1.4, // 歩く速度 (m/s)
         run: 4.0,  // 走る速度 (m/s)
     };
+    const DAY_TYPES = {
+        WEEKDAY: 'weekday',
+        HOLIDAY: 'holiday',
+    };
 
     // --- DOM要素の取得 ---
     const elements = {
@@ -34,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- 状態管理 ---
         stationData: {},
         currentStationId: '',
-        currentDayType: 'weekday',
+        currentDayType: DAY_TYPES.WEEKDAY,
         countdownInterval: null,
         nextTrain: null,
         isTimetableCollapsed: false,
@@ -96,38 +100,51 @@ document.addEventListener('DOMContentLoaded', () => {
             this.countdownInterval = setInterval(() => this.updateCountdown(), 1000);
         },
 
-        updateCountdown() {
-            if (!this.currentStationId) return;
-            const now = new Date();
-            const trains = this.stationData[this.currentStationId].timetable[this.currentDayType];
-            
-            this.nextTrain = null;
-            if (trains && trains.length > 0) {
-                for (const train of trains) {
+        findNextTrain(now) {
+            const timetable = this.stationData[this.currentStationId]?.timetable;
+            if (!timetable) return { train: null, dayHasChanged: false };
+
+            const currentTrains = timetable[this.currentDayType];
+            if (currentTrains) {
+                const foundTrain = currentTrains.find(train => {
                     const trainTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), train.hour, train.minute, 0);
-                    if (trainTime > now) {
-                        this.nextTrain = train;
-                        break;
-                    }
+                    return trainTime > now;
+                });
+                if (foundTrain) {
+                    return { train: foundTrain, dayHasChanged: false };
                 }
             }
 
-            if (this.nextTrain === null && trains && trains.length > 0) {
-                const tomorrow = new Date(now);
-                tomorrow.setDate(now.getDate() + 1);
-                const dayOfWeek = tomorrow.getDay();
-                const nextDayType = (dayOfWeek === 0 || dayOfWeek === 6) ? 'holiday' : 'weekday';
-                const nextDayTrains = this.stationData[this.currentStationId].timetable[nextDayType];
+            // Check for next day's train
+            const tomorrow = new Date(now);
+            tomorrow.setDate(now.getDate() + 1);
+            const dayOfWeek = tomorrow.getDay();
+            const nextDayType = (dayOfWeek === 0 || dayOfWeek === 6) ? DAY_TYPES.HOLIDAY : DAY_TYPES.WEEKDAY;
+            const nextDayTrains = timetable[nextDayType];
 
-                if (nextDayTrains && nextDayTrains.length > 0) {
-                    this.nextTrain = nextDayTrains[0];
-                    if (nextDayType !== this.currentDayType) {
-                        this.currentDayType = nextDayType;
-                        document.querySelector(`.selectors button[data-day="${nextDayType}"]`).classList.add('active');
-                        document.querySelector(`.selectors button[data-day="${this.currentDayType === 'weekday' ? 'holiday' : 'weekday'}"]`).classList.remove('active');
-                        this.renderTimetable();
-                    }
-                }
+            if (nextDayTrains && nextDayTrains.length > 0) {
+                return { 
+                    train: nextDayTrains[0], 
+                    dayHasChanged: nextDayType !== this.currentDayType, 
+                    newDayType: nextDayType 
+                };
+            }
+
+            return { train: null, dayHasChanged: false };
+        },
+
+        updateCountdown() {
+            if (!this.currentStationId) return;
+            
+            const now = new Date();
+            const { train, dayHasChanged, newDayType } = this.findNextTrain(now);
+            this.nextTrain = train;
+
+            if (dayHasChanged) {
+                this.currentDayType = newDayType;
+                document.querySelector(`.selectors button[data-day="${newDayType}"]`).classList.add('active');
+                document.querySelector(`.selectors button[data-day="${newDayType === DAY_TYPES.WEEKDAY ? DAY_TYPES.HOLIDAY : DAY_TYPES.WEEKDAY}"]`).classList.remove('active');
+                this.renderTimetable();
             }
 
             if (this.nextTrain) {
@@ -257,7 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         // --- イベントリスナー設定 ---
-        setupEventListeners() {
+        setupSearchListener() {
             elements.searchBox.addEventListener('input', () => {
                 const query = elements.searchBox.value.toLowerCase();
                 elements.searchResults.innerHTML = '';
@@ -279,6 +296,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     elements.searchResults.style.display = 'none';
                 }
             });
+        },
+
+        setupEventListeners() {
+            this.setupSearchListener();
 
             elements.dayButtons.forEach(button => {
                 button.addEventListener('click', (e) => {
