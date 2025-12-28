@@ -1,5 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- 定数定義 ---
+    const API_ACCESS_TOKEN = 'stzjsste7nc0cvkirknr8dylepy6bjgkgbuxn2i0av7r4r6186gregrz645w7331';
+    const API_BASE_URL = 'https://api.odpt.org/api/v4/';
+
     const RUSH_ALERT_SPEEDS = {
         walk: 1.4, // 歩く速度 (m/s)
         run: 4.0,  // 走る速度 (m/s)
@@ -15,8 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
         themeSwitcherButtons: document.querySelectorAll('#theme-switcher button'),
         searchBox: document.getElementById('search-box'),
         searchResults: document.getElementById('search-results'),
+        searchType: document.getElementById('search-type'), // New
         stationName: document.getElementById('station-name'),
         direction: document.getElementById('direction'),
+        lineSelector: document.getElementById('line-selector'),
         timer: document.getElementById('timer'),
         timetableBody: document.querySelector('#timetable tbody'),
         dayButtons: document.querySelectorAll('.selectors button'),
@@ -36,12 +41,37 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- アプリケーション本体 ---
     const app = {
         // --- 状態管理 ---
-        stationData: {},
-        currentStationId: '',
+        stationCache: {}, 
+        currentStation: null, 
+        currentTimetable: [], 
         currentDayType: DAY_TYPES.WEEKDAY,
+        // 新しい状態：現在表示している路線の情報
+        currentLine: { railway: null, direction: null },
         countdownInterval: null,
         nextTrain: null,
         isTimetableCollapsed: false,
+
+        // --- API通信 ---
+        async fetchFromApi(endpoint, params = {}) {
+            const url = new URL(API_BASE_URL + endpoint);
+            url.searchParams.append('acl:consumerKey', API_ACCESS_TOKEN);
+            for (const key in params) {
+                url.searchParams.append(key, params[key]);
+            }
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    if (response.status === 403) console.error("APIキーが無効、またはアクセスが拒否されました。");
+                    if (response.status >= 400 && response.status < 500) return [];
+                    throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error(`API call to ${endpoint} failed:`, error);
+                elements.stationName.textContent = "データ取得エラー";
+                return null;
+            }
+        },
 
         // --- 初期化 ---
         async initialize() {
@@ -49,30 +79,141 @@ document.addEventListener('DOMContentLoaded', () => {
             this.loadTheme();
             this.loadTimetableState();
             
-            try {
-                const response = await fetch('./stations.json');
-                this.stationData = await response.json();
-                const initialStationId = Object.keys(this.stationData)[0];
-                if (initialStationId) {
-                    this.changeStation(initialStationId);
-                }
-            } catch (error) {
-                console.error("時刻表データの読み込みに失敗しました:", error);
-                elements.stationName.textContent = "データ読込エラー";
+            const defaultStationTitle = '渋谷';
+            const stations = await this.fetchFromApi('odpt:Station', { 'dc:title': defaultStationTitle });
+            if (stations && stations.length > 0) {
+                const groupedStations = {};
+                stations.forEach(station => {
+                    const title = station['dc:title'];
+                    if (!groupedStations[title]) {
+                        groupedStations[title] = {
+                            ids: [],
+                            latitude: station['geo:lat'],
+                            longitude: station['geo:long'],
+                            operator: station['odpt:operator'].split('.').pop()
+                        };
+                    }
+                    groupedStations[title].ids.push(station['owl:sameAs']);
+                });
+                this.stationCache = groupedStations;
+                await this.changeStation(defaultStationTitle);
+            } else {
+                elements.stationName.textContent = "駅を検索してください";
             }
         },
 
-        // --- 駅の変更 ---
-        changeStation(stationId) {
-            this.currentStationId = stationId;
-            const station = this.stationData[stationId];
-            if (!station) return;
+        // --- 駅選択後の処理 ---
+        async changeStation(stationTitle, railwayId = null) {
+            const stationGroup = this.stationCache[stationTitle];
+            if (!stationGroup) return;
 
-            elements.stationName.textContent = station.stationName;
-            elements.direction.textContent = station.lineName;
+            elements.stationName.textContent = stationTitle;
+            elements.direction.textContent = '時刻表を検索中...';
+            elements.lineSelector.innerHTML = '';
+            elements.timetableBody.innerHTML = '';
+            elements.timer.textContent = "--:--";
             elements.searchBox.value = '';
             elements.searchResults.innerHTML = '';
             elements.searchResults.style.display = 'none';
+            clearInterval(this.countdownInterval);
+
+            let timetables = [];
+            for (const stationId of stationGroup.ids) {
+                let params = { 'odpt:station': stationId };
+                if (railwayId) {
+                    params['odpt:railway'] = railwayId;
+                }
+                const result = await this.fetchFromApi('odpt:StationTimetable', params);
+                if (result && result.length > 0) {
+                    timetables.push(...result);
+                }
+            }
+            
+            this.currentStation = {
+                title: stationTitle,
+                latitude: stationGroup.latitude,
+                longitude: stationGroup.longitude,
+                timetables: timetables
+            };
+
+            if (timetables.length === 0) {
+                elements.direction.textContent = '時刻表データがありません';
+                return;
+            }
+
+            const uniqueLines = this.getUniqueLines(timetables);
+
+            if (uniqueLines.length === 1) {
+                const line = uniqueLines[0];
+                this.displayTimetableForLine(line.railway, line.direction);
+            } else {
+                this.renderLineSelector(uniqueLines);
+            }
+        },
+
+        getUniqueLines(timetables) {
+            const lines = new Map();
+            timetables.forEach(table => {
+                const railway = table['odpt:railway'];
+                const direction = table['odpt:railDirection'];
+                const key = `${railway}-${direction}`;
+                if (!lines.has(key)) {
+                    lines.set(key, {
+                        railway: railway,
+                        direction: direction,
+                        railwayTitle: table['odpt:railwayTitle']?.ja || direction?.split('.').pop(),
+                        directionTitle: direction?.split('.').pop()
+                    });
+                }
+            });
+            return Array.from(lines.values());
+        },
+
+        // --- 路線選択UIの描画 ---
+        renderLineSelector(uniqueLines) {
+            elements.direction.textContent = '路線・方面を選択してください';
+            elements.lineSelector.innerHTML = '';
+            uniqueLines.forEach(line => {
+                const button = document.createElement('button');
+                button.textContent = `${line.railwayTitle} (${line.directionTitle})`;
+                button.addEventListener('click', () => this.displayTimetableForLine(line.railway, line.direction));
+                elements.lineSelector.appendChild(button);
+            });
+        },
+
+        // --- 時刻表の表示 ---
+        displayTimetableForLine(railway, direction) {
+            this.currentLine = { railway, direction }; // 現在の路線を記憶
+            const calendarKey = this.currentDayType === DAY_TYPES.WEEKDAY ? "odpt.Calendar:Weekday" : "odpt.Calendar:Holiday";
+
+            const timetableData = this.currentStation.timetables.find(table => 
+                table['odpt:railway'] === railway && 
+                table['odpt:railDirection'] === direction &&
+                table['odpt:calendar'] === calendarKey
+            );
+
+            if (!timetableData || !timetableData['odpt:stationTimetableObject']) {
+                elements.timetableBody.innerHTML = `<tr><td colspan="3">選択された曜日の時刻表データがありません。</td></tr>`;
+                elements.direction.textContent = 'データがありません';
+                elements.timer.textContent = "--:--";
+                clearInterval(this.countdownInterval);
+                return;
+            }
+
+            this.currentTimetable = timetableData['odpt:stationTimetableObject'].map(obj => {
+                const time = obj['odpt:departureTime'].split(':');
+                return {
+                    hour: parseInt(time[0], 10),
+                    minute: parseInt(time[1], 10),
+                    type: obj['odpt:trainType']?.split('.').pop(),
+                    destination: obj['odpt:destinationStation']?.[0]?.split('.').pop() || '---'
+                };
+            });
+            
+            const title = timetableData['odpt:railwayTitle']?.ja || '';
+            const dir = timetableData['odpt:railDirection'] ? `(${timetableData['odpt:railDirection'].split('.').pop()})` : '';
+            elements.direction.textContent = `${title} ${dir}`;
+            elements.lineSelector.innerHTML = '';
 
             this.renderTimetable();
             this.startCountdown();
@@ -82,11 +223,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- 描画関連 ---
         renderTimetable() {
             elements.timetableBody.innerHTML = '';
-            if (!this.currentStationId) return;
-            const trains = this.stationData[this.currentStationId].timetable[this.currentDayType];
-            if (!trains) return;
+            if (!this.currentTimetable || this.currentTimetable.length === 0) {
+                elements.timetableBody.innerHTML = `<tr><td colspan="3">本日分の運行は終了、またはデータがありません。</td></tr>`;
+                return;
+            }
 
-            trains.forEach(train => {
+            this.currentTimetable.forEach(train => {
                 const row = document.createElement('tr');
                 row.innerHTML = `<td>${train.type}</td><td>${train.destination}</td><td>${String(train.hour).padStart(2, '0')}:${String(train.minute).padStart(2, '0')}</td>`;
                 elements.timetableBody.appendChild(row);
@@ -101,51 +243,22 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         findNextTrain(now) {
-            const timetable = this.stationData[this.currentStationId]?.timetable;
-            if (!timetable) return { train: null, dayHasChanged: false };
-
-            const currentTrains = timetable[this.currentDayType];
-            if (currentTrains) {
-                const foundTrain = currentTrains.find(train => {
-                    const trainTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), train.hour, train.minute, 0);
-                    return trainTime > now;
-                });
-                if (foundTrain) {
-                    return { train: foundTrain, dayHasChanged: false };
-                }
+            if (!this.currentTimetable || this.currentTimetable.length === 0) {
+                return { train: null };
             }
-
-            // Check for next day's train
-            const tomorrow = new Date(now);
-            tomorrow.setDate(now.getDate() + 1);
-            const dayOfWeek = tomorrow.getDay();
-            const nextDayType = (dayOfWeek === 0 || dayOfWeek === 6) ? DAY_TYPES.HOLIDAY : DAY_TYPES.WEEKDAY;
-            const nextDayTrains = timetable[nextDayType];
-
-            if (nextDayTrains && nextDayTrains.length > 0) {
-                return { 
-                    train: nextDayTrains[0], 
-                    dayHasChanged: nextDayType !== this.currentDayType, 
-                    newDayType: nextDayType 
-                };
-            }
-
-            return { train: null, dayHasChanged: false };
+            const foundTrain = this.currentTimetable.find(train => {
+                const trainTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), train.hour, train.minute, 0);
+                return trainTime > now;
+            });
+            return { train: foundTrain || this.currentTimetable[0] };
         },
 
         updateCountdown() {
-            if (!this.currentStationId) return;
+            if (!this.currentStation) return;
             
             const now = new Date();
-            const { train, dayHasChanged, newDayType } = this.findNextTrain(now);
+            const { train }_ = this.findNextTrain(now);
             this.nextTrain = train;
-
-            if (dayHasChanged) {
-                this.currentDayType = newDayType;
-                document.querySelector(`.selectors button[data-day="${newDayType}"]`).classList.add('active');
-                document.querySelector(`.selectors button[data-day="${newDayType === DAY_TYPES.WEEKDAY ? DAY_TYPES.HOLIDAY : DAY_TYPES.WEEKDAY}"]`).classList.remove('active');
-                this.renderTimetable();
-            }
 
             if (this.nextTrain) {
                 const nextTrainDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), this.nextTrain.hour, this.nextTrain.minute, 0);
@@ -174,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- 駆け込みアラート関連 ---
         updateRushAlert() {
-            if (!navigator.geolocation || !this.nextTrain) {
+            if (!navigator.geolocation || !this.nextTrain || !this.currentStation) {
                 elements.rushAlert.classList.remove('visible');
                 return;
             }
@@ -189,8 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 (position) => {
                     const userLat = position.coords.latitude;
                     const userLon = position.coords.longitude;
-                    const station = this.stationData[this.currentStationId];
-                    const distance = this.calculateDistance(userLat, userLon, station.latitude, station.longitude);
+                    const distance = this.calculateDistance(userLat, userLon, this.currentStation.latitude, this.currentStation.longitude);
                     const timeToDeparture = (nextTrainDate - new Date()) / 1000;
                     this.showRushAlert(distance, timeToDeparture);
                 },
@@ -238,7 +350,6 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.alertMessage.textContent = message;
             elements.rushAlert.className = `rush-alert ${alertClass} visible`;
 
-            // NERV theme specific
             const currentTheme = localStorage.getItem('rushRunnerTheme');
             if (currentTheme === 'nerv' && alertClass === 'danger') {
                 elements.emergencyLabel.textContent = 'EMERGENCY';
@@ -274,41 +385,43 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         // --- イベントリスナー設定 ---
-        setupSearchListener() {
-            elements.searchBox.addEventListener('input', () => {
-                const query = elements.searchBox.value.toLowerCase();
-                elements.searchResults.innerHTML = '';
-                if (query.length === 0) {
-                    elements.searchResults.style.display = 'none';
-                    return;
-                }
-                const matchedStations = Object.keys(this.stationData).filter(id => this.stationData[id].stationName.toLowerCase().includes(query));
-                if (matchedStations.length > 0) {
-                    matchedStations.forEach(id => {
-                        const li = document.createElement('li');
-                        li.textContent = this.stationData[id].stationName;
-                        li.dataset.stationId = id;
-                        li.addEventListener('click', () => this.changeStation(id));
-                        elements.searchResults.appendChild(li);
-                    });
-                    elements.searchResults.style.display = 'block';
-                } else {
-                    elements.searchResults.style.display = 'none';
-                }
-            });
-        },
-
         setupEventListeners() {
-            this.setupSearchListener();
+            let searchTimer;
+            elements.searchBox.addEventListener('input', () => {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(() => this.handleSearch(), 300);
+            });
+
+            elements.searchType.addEventListener('change', () => {
+                elements.searchBox.value = '';
+                elements.searchResults.innerHTML = '';
+                elements.searchResults.style.display = 'none';
+                const searchType = elements.searchType.value;
+                let placeholder = '';
+                switch (searchType) {
+                    case 'station':
+                        placeholder = '駅名を入力 (例: 渋谷)';
+                        break;
+                    case 'railway':
+                        placeholder = '路線名を入力 (例: 山手線)';
+                        break;
+                    case 'operator':
+                        placeholder = '事業者名を入力 (例: JR東日本)';
+                        break;
+                }
+                elements.searchBox.placeholder = placeholder;
+                this.handleSearch(); // Trigger search on type change
+            });
 
             elements.dayButtons.forEach(button => {
                 button.addEventListener('click', (e) => {
+                    this.currentDayType = e.target.dataset.day;
                     elements.dayButtons.forEach(btn => btn.classList.remove('active'));
                     e.target.classList.add('active');
-                    this.currentDayType = e.target.dataset.day;
-                    this.renderTimetable();
-                    this.startCountdown();
-                    this.updateRushAlert();
+                    
+                    if (this.currentStation && this.currentLine.railway) {
+                        this.displayTimetableForLine(this.currentLine.railway, this.currentLine.direction);
+                    }
                 });
             });
 
@@ -318,13 +431,104 @@ document.addEventListener('DOMContentLoaded', () => {
 
             elements.timetableHeader.addEventListener('click', () => this.toggleTimetable());
 
-            // --- 試験用ボタン ---
             elements.debugSafe.addEventListener('click', () => this.showRushAlert(200, 600));
             elements.debugWarning.addEventListener('click', () => this.showRushAlert(500, 180));
             elements.debugDanger.addEventListener('click', () => this.showRushAlert(1000, 60));
+        },
+
+        async handleSearch() {
+            const query = elements.searchBox.value.trim();
+            const type = elements.searchType.value;
+
+            if ((type === 'station' || type === 'railway') && query.length < 1) {
+                elements.searchResults.innerHTML = '';
+                elements.searchResults.style.display = 'none';
+                return;
+            }
+
+            let endpoint = '';
+            let params = {};
+            if (query) {
+                params['dc:title'] = query;
+            }
+
+            switch (type) {
+                case 'station':
+                    endpoint = 'odpt:Station';
+                    break;
+                case 'railway':
+                    endpoint = 'odpt:Railway';
+                    break;
+                case 'operator':
+                    endpoint = 'odpt:Operator';
+                    break;
+            }
+
+            const results = await this.fetchFromApi(endpoint, params);
+            this.displaySearchResults(results, type);
+        },
+
+        displaySearchResults(results, type, context = {}) {
+            elements.searchResults.innerHTML = '';
+            this.stationCache = {}; // Reset station cache
+
+            if (!results || results.length === 0) {
+                elements.searchResults.style.display = 'none';
+                return;
+            }
+
+            if (type === 'station') {
+                const groupedStations = {};
+                results.forEach(station => {
+                    const title = station['dc:title'];
+                    if (!groupedStations[title]) {
+                        groupedStations[title] = {
+                            ids: [],
+                            latitude: station['geo:lat'],
+                            longitude: station['geo:long'],
+                            operator: station['odpt:operator'].split('.').pop()
+                        };
+                    }
+                    groupedStations[title].ids.push(station['owl:sameAs']);
+                });
+                this.stationCache = groupedStations;
+
+                Object.keys(groupedStations).forEach(title => {
+                    const stationGroup = groupedStations[title];
+                    const li = document.createElement('li');
+                    li.textContent = `[駅] ${title} (${stationGroup.operator})`;
+                    li.dataset.stationTitle = title;
+                    li.addEventListener('click', () => this.changeStation(title, context.railway));
+                    elements.searchResults.appendChild(li);
+                });
+            } else if (type === 'railway') {
+                results.forEach(railway => {
+                    const title = railway['dc:title'];
+                    const operator = railway['odpt:operator'].split('.').pop();
+                    const li = document.createElement('li');
+                    li.textContent = `[路線] ${title} (${operator})`;
+                    li.addEventListener('click', async () => {
+                        const stations = await this.fetchFromApi('odpt:Station', { 'odpt:railway': railway['owl:sameAs'] });
+                        this.displaySearchResults(stations, 'station', { railway: railway['owl:sameAs'] });
+                    });
+                    elements.searchResults.appendChild(li);
+                });
+            } else if (type === 'operator') {
+                results.forEach(operator => {
+                    const title = operator['dc:title'];
+                    const li = document.createElement('li');
+                    li.textContent = `[事業者] ${title}`;
+                    li.addEventListener('click', async () => {
+                        const railways = await this.fetchFromApi('odpt:Railway', { 'odpt:operator': operator['owl:sameAs'] });
+                        this.displaySearchResults(railways, 'railway');
+                    });
+                    elements.searchResults.appendChild(li);
+                });
+            }
+
+            elements.searchResults.style.display = 'block';
         }
     };
 
-    // --- アプリケーション実行 ---
     app.initialize();
 });

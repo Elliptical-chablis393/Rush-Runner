@@ -28,15 +28,15 @@
 
         <main>
             <div id="search-container">
-                
                 <input type="text" id="search-box" placeholder="駅名を入力 (例: 渋谷)">
                 <ul id="search-results"></ul>
             </div>
 
-            <div id="station-info">
-                <h2 id="station-name"></h2>
-                <p id="direction"></p>
-            </div>
+        <div class="station-header">
+            <h1 id="station-name">駅を検索...</h1>
+            <h2 id="direction"></h2>
+            <div id="line-selector"></div>
+        </div>
 
             <div id="countdown">
                 <p class="countdown-label">次の電車</p>
@@ -89,6 +89,6 @@
         <button id="debug-danger">無理</button>
     </div>
 
-    <script src="script.js"></script>
+    <script src="app.v3.js"></script>
 </body>
 </html>

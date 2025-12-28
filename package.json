@@ -1,0 +1,16 @@
+{
+  "name": "rush-runner",
+  "private": true,
+  "version": "0.1.0",
+  "description": "RushRunner static dev server",
+  "scripts": {
+    "start": "node server.js",
+    "serve": "node server.js"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "dependencies": {
+    "sqlite3": "^5.1.7"
+  }
+}
