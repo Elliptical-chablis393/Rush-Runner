@@ -1,6 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,9 +8,12 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@400;500;700&family=Roboto+Mono:wght@700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@400;500;700&family=Roboto+Mono:wght@700&family=Orbitron:wght@400;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body class="theme-light"> <!-- デフォルトテーマを指定 -->
 
     <div id="theme-switcher">
@@ -22,9 +25,32 @@
 
     <div class="container">
         <header>
-            <h1>RushRunner</h1>
+            <div class="header-top">
+                <h1>RushRunner</h1>
+                <button id="settings-toggle" class="icon-btn" title="設定">⚙️</button>
+            </div>
             <p class="description">次の電車まで、あとどれくらい？</p>
+            <div id="train-info-container" class="train-info"></div>
         </header>
+
+        <!-- Settings Overlay -->
+        <div id="settings-overlay" class="overlay" style="display: none;">
+            <div class="modal">
+                <h2>設定</h2>
+                <div class="setting-item">
+                    <label for="buffer-input">駅構内移動時間 (分):</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="buffer-input" min="0" max="15" value="0">
+                        <span>分</span>
+                    </div>
+                    <p class="hint">※改札からホームまでの移動時間を考慮します。</p>
+                </div>
+                <div class="modal-actions">
+                    <button id="save-settings" class="primary-btn">保存</button>
+                    <button id="close-settings" class="secondary-btn">キャンセル</button>
+                </div>
+            </div>
+        </div>
 
         <main>
             <div id="search-container">
@@ -32,11 +58,15 @@
                 <ul id="search-results"></ul>
             </div>
 
-        <div class="station-header">
-            <h1 id="station-name">駅を検索...</h1>
-            <h2 id="direction"></h2>
-            <div id="line-selector"></div>
-        </div>
+            <div class="station-header">
+                <h1 id="station-name">駅を検索...</h1>
+                <h2 id="direction"></h2>
+                <div id="direction-selector" class="direction-selector">
+                    <label for="direction-select">方面:</label>
+                    <select id="direction-select"></select>
+                </div>
+                <div id="line-selector"></div>
+            </div>
 
             <div id="countdown">
                 <p class="countdown-label">次の電車</p>
@@ -91,4 +121,5 @@
 
     <script src="app.v3.js"></script>
 </body>
+
 </html>

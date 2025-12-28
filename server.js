@@ -3,13 +3,58 @@ const fs = require('fs');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 const url = require('url');
+const https = require('https'); // Added https
+const { API_ACCESS_TOKEN } = require('./config');
 
-const port = process.env.PORT || 5173;
+const port = 5173;
 const root = __dirname;
 const db = new sqlite3.Database(path.join(root, 'database.sqlite'));
 
+/**
+ * ODPT APIにリクエストを送信する汎用関数
+ */
+function apiRequest(path, params) {
+  return new Promise((resolve, reject) => {
+    const query = new URLSearchParams({
+      ...params,
+      'acl:consumerKey': API_ACCESS_TOKEN
+    }).toString();
+
+    const options = {
+      hostname: 'api.odpt.org',
+      port: 443,
+      path: `${path}?${query}`,
+      method: 'GET'
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          try {
+            resolve(JSON.parse(data));
+          } catch (e) {
+            reject(new Error('APIレスポンスのJSONパースに失敗しました。'));
+          }
+        } else {
+          reject(new Error(`APIリクエストエラー: ステータスコード ${res.statusCode} `));
+        }
+      });
+    });
+
+    req.on('error', (e) => {
+      reject(new Error(`APIリクエストに失敗しました: ${e.message} `));
+    });
+
+    req.end();
+  });
+}
+
 const mime = {
-  '.html': 'text/html; charset=utf-8',
+  '.html': 'text/html',
   '.js': 'application/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
@@ -21,7 +66,7 @@ const mime = {
   '.woff2': 'font/woff2',
 };
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => { // Made the callback async
   const parsedUrl = url.parse(req.url, true);
   const urlPath = decodeURIComponent(parsedUrl.pathname);
 
@@ -57,36 +102,51 @@ const server = http.createServer((req, res) => {
         res.writeHead(500, { 'Content-Type': 'application/json' });
         return res.end(JSON.stringify({ error: err.message }));
       }
-      
+
       db.get("SELECT name, line, lat, lon FROM stations WHERE id = ?", [stationId], (stationErr, stationRow) => {
         if (stationErr) {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            return res.end(JSON.stringify({ error: stationErr.message }));
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify({ error: stationErr.message }));
         }
         if (!stationRow) {
-            res.writeHead(404, { 'Content-Type': 'application/json' });
-            return res.end(JSON.stringify({ error: 'Station not found' }));
+          res.writeHead(404, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify({ error: 'Station not found' }));
         }
 
-        const response = {
-            stationName: stationRow.name,
-            lineName: stationRow.line.replace('odpt.Railway:JR-East.',''),
-            latitude: stationRow.lat,
-            longitude: stationRow.lon,
-            timetable: {
-                weekday: [],
-                holiday: []
-            }
-        };
+        // Get unique directions for this station
+        const directions = [...new Set(rows.map(r => r.direction))];
+
+        // Build timetable grouped by direction
+        const timetableByDirection = {};
+        directions.forEach(dir => {
+          timetableByDirection[dir] = {
+            weekday: [],
+            holiday: []
+          };
+        });
 
         rows.forEach(row => {
-            response.timetable[row.day_type].push({
-                type: row.type,
-                destination: row.destination,
-                hour: row.hour,
-                minute: row.minute
+          if (timetableByDirection[row.direction]) {
+            timetableByDirection[row.direction][row.day_type].push({
+              type: row.type,
+              destination: row.destination,
+              hour: row.hour,
+              minute: row.minute
             });
+          }
         });
+
+        const response = {
+          stationName: stationRow.name,
+          line: stationRow.line,
+          lineName: stationRow.line.replace('odpt.Railway:', ''),
+          latitude: stationRow.lat,
+          longitude: stationRow.lon,
+          directions: directions,
+          timetableByDirection: timetableByDirection,
+          // Legacy: first direction's timetable for backwards compatibility
+          timetable: timetableByDirection[directions[0]] || { weekday: [], holiday: [] }
+        };
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(response));
@@ -100,6 +160,29 @@ const server = http.createServer((req, res) => {
   if (!filePath.startsWith(root)) {
     res.writeHead(403);
     return res.end('Forbidden');
+  }
+
+  // --- 運行情報取得API ---
+  if (urlPath === '/api/info') {
+    const railway = parsedUrl.query.railway;
+    if (!railway) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ error: 'Missing railway parameter' }));
+    }
+
+    try {
+      console.log(`Fetching train info for ${railway}...`);
+      const data = await apiRequest('/api/v4/odpt:TrainInformation', {
+        'odpt:railway': railway
+      });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(data));
+    } catch (error) {
+      console.error('Error fetching train info:', error);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Failed to fetch train info' }));
+    }
+    return;
   }
 
   fs.stat(filePath, (err, stats) => {

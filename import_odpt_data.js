@@ -5,8 +5,12 @@ const { API_ACCESS_TOKEN } = require('./config');
 const sqlite3 = require('sqlite3').verbose();
 
 const DB_FILE = './database.sqlite';
-const TARGET_OPERATOR = 'odpt.Operator:TokyoMetro';
-const TARGET_RAILWAY = 'odpt.Railway:TokyoMetro.Ginza';
+const TARGET_LINES = [
+    { operator: 'odpt.Operator:TokyoMetro', railway: 'odpt.Railway:TokyoMetro.Ginza' },
+    { operator: 'odpt.Operator:TokyoMetro', railway: 'odpt.Railway:TokyoMetro.Marunouchi' },
+    { operator: 'odpt.Operator:TokyoMetro', railway: 'odpt.Railway:TokyoMetro.Hibiya' },
+    { operator: 'odpt.Operator:Toei', railway: 'odpt.Railway:Toei.Shinjuku' }
+];
 
 // --- グローバル変数 ---
 const db = new sqlite3.Database(DB_FILE);
@@ -67,6 +71,18 @@ function clearDatabase() {
             db.run("DELETE FROM timetables", (err) => {
                 if (err) return reject(err);
             });
+            // Drop and recreate timetables with direction
+            db.run(`DROP TABLE IF EXISTS timetables`);
+            db.run(`CREATE TABLE IF NOT EXISTS timetables (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                station_id TEXT NOT NULL,
+                direction TEXT,
+                day_type TEXT NOT NULL,
+                hour INTEGER NOT NULL,
+                minute INTEGER NOT NULL,
+                type TEXT,
+                destination TEXT
+            )`);
             db.run("DELETE FROM stations", (err) => {
                 if (err) return reject(err);
                 console.log('データクリア完了。');
@@ -81,23 +97,34 @@ function clearDatabase() {
  */
 async function fetchAndSaveStations() {
     console.log('駅情報の取得を開始します...');
-    const stations = await apiRequest('/api/v4/odpt:Station', {
-        'odpt:operator': TARGET_OPERATOR,
-        'odpt:railway': TARGET_RAILWAY
-    });
 
-    console.log(`${stations.length}件の駅情報を取得しました。データベースに保存します...`);
+    let allStations = [];
+    for (const line of TARGET_LINES) {
+        console.log(`[${line.railway}] の駅情報を取得中...`);
+        try {
+            const stations = await apiRequest('/api/v4/odpt:Station', {
+                'odpt:operator': line.operator,
+                'odpt:railway': line.railway
+            });
+            console.log(`  -> ${stations.length}件取得`);
+            allStations = allStations.concat(stations);
+        } catch (e) {
+            console.error(`  -> 取得失敗: ${e.message}`);
+        }
+    }
+
+    console.log(`合計 ${allStations.length}件の駅情報を取得しました。データベースに保存します...`);
 
     const stmt = db.prepare("INSERT OR REPLACE INTO stations (id, name, line, lat, lon) VALUES (?, ?, ?, ?, ?)");
 
     return new Promise((resolve, reject) => {
-        const promises = stations.map(station => {
+        const promises = allStations.map(station => {
             return new Promise((res, rej) => {
                 const lat = station['geo:lat'] || 0.0;
                 const lon = station['geo:long'] || 0.0;
 
                 if (!station['geo:lat']) {
-                    console.warn(`[警告] 駅「${station['dc:title']}」の緯度・経度情報が見つからないため、0.0を使用します。`);
+                    // console.warn(`[警告] 駅「${station['dc:title']}」の緯度・経度情報が見つからないため、0.0を使用します。`);
                 }
 
                 stmt.run(
@@ -111,7 +138,7 @@ async function fetchAndSaveStations() {
                             console.error(`Error inserting station ${station['dc:title']}:`, err.message);
                             res();
                         } else {
-                            console.log(`Inserted station ${station['dc:title']}`);
+                            // console.log(`Inserted station ${station['dc:title']}`);
                             res();
                         }
                     }
@@ -146,7 +173,7 @@ async function fetchAndSaveTimetables() {
         });
     });
 
-    const stmt = db.prepare("INSERT OR REPLACE INTO timetables (station_id, day_type, hour, minute, type, destination) VALUES (?, ?, ?, ?, ?, ?)");
+    const stmt = db.prepare("INSERT OR REPLACE INTO timetables (station_id, direction, day_type, hour, minute, type, destination) VALUES (?, ?, ?, ?, ?, ?, ?)");
 
     // Promise.allを使用して、すべての駅の時刻表取得を並列実行
     const timetablePromises = stations.map(async (station) => {
@@ -185,8 +212,11 @@ async function fetchAndSaveTimetables() {
 
                         const [hour, minute] = obj['odpt:departureTime'].split(':').map(Number);
 
-                        // IDから末尾の名称のみを抽出してシンプルに保存（例: odpt.TrainType:JR-East.Local -> Local）
-                        // 必要に応じて日本語変換もできるが、まずは動くことを優先してID末尾を使用
+                        // 方面情報を取得 (例: odpt.RailDirection:TokyoMetro.Shibuya -> Shibuya)
+                        const direction = timetable['odpt:railDirection']
+                            ? timetable['odpt:railDirection'].split('.').pop()
+                            : '不明';
+
                         const trainType = obj['odpt:trainType']
                             ? obj['odpt:trainType'].split('.').pop()
                             : '各停';
@@ -195,7 +225,7 @@ async function fetchAndSaveTimetables() {
                             ? obj['odpt:destinationStation'][0].split('.').pop()
                             : '不明';
 
-                        stmt.run(stationId, dayType, hour, minute, trainType, destination);
+                        stmt.run(stationId, direction, dayType, hour, minute, trainType, destination);
                     }
                 }
             }
@@ -227,7 +257,7 @@ async function main() {
     }
 
     try {
-        // await clearDatabase();
+        await clearDatabase();
         await fetchAndSaveStations();
         await fetchAndSaveTimetables();
         console.log('🎉 データのインポートがすべて完了しました！');

@@ -28,6 +28,12 @@ document.addEventListener('DOMContentLoaded', () => {
         timetableWrapper: document.querySelector('.timetable-wrapper'),
         timetableHeader: document.getElementById('timetable-header'),
         toggleIcon: document.querySelector('.toggle-icon'),
+        settingsToggle: document.getElementById('settings-toggle'),
+        settingsOverlay: document.getElementById('settings-overlay'),
+        bufferInput: document.getElementById('buffer-input'),
+        saveSettings: document.getElementById('save-settings'),
+        closeSettings: document.getElementById('close-settings'),
+        directionSelect: document.getElementById('direction-select'),
     };
 
     // --- アプリケーション本体 ---
@@ -40,20 +46,26 @@ document.addEventListener('DOMContentLoaded', () => {
         isTimetableCollapsed: false,
         _lastRushAlertUpdate: 0,
         _searchTimeout: null,
+        bufferTime: 0, // 駅構内移動時間 (分)
+        currentDirection: null, // 選択中の方面
 
         // --- 初期化 ---
         async initialize() {
             this.setupEventListeners();
             this.loadTheme();
             this.loadTimetableState();
+            this.loadSettings();
 
             const today = new Date();
             const dow = today.getDay();
             this.currentDayType = (dow === 0 || dow === 6) ? 'holiday' : 'weekday';
             elements.dayButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.day === this.currentDayType));
 
-            // 初期表示として「渋谷駅（銀座線）」を読み込む
-            this.changeStation('odpt.Station:TokyoMetro.Ginza.Shibuya');
+            // 保存された駅があればそれを読み込む、なければ初期値（渋谷）
+            const savedStationId = localStorage.getItem('rushRunnerLastStation');
+            const defaultStationId = 'odpt.Station:TokyoMetro.Ginza.Shibuya';
+
+            this.changeStation(savedStationId || defaultStationId);
         },
 
         // --- 駅検索 (API) ---
@@ -72,14 +84,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     elements.searchResults.innerHTML = '';
                     if (stations.length > 0) {
+                        elements.searchResults.style.display = 'block';
                         stations.forEach(station => {
                             const li = document.createElement('li');
-                            li.textContent = station.name;
+                            // 路線IDから可読な部分を抽出 (例: odpt.Railway:TokyoMetro.Ginza -> TokyoMetro.Ginza)
+                            // さらにシンプルに "Ginza" だけでも良いが、一旦は短縮形で表示
+                            const lineName = station.line.replace('odpt.Railway:', '').split('.').pop();
+                            li.textContent = `${station.name} (${lineName})`;
                             li.dataset.stationId = station.id;
-                            li.addEventListener('click', () => this.changeStation(station.id));
+                            li.addEventListener('click', () => {
+                                this.changeStation(station.id);
+                            });
                             elements.searchResults.appendChild(li);
                         });
-                        elements.searchResults.style.display = 'block';
                     } else {
                         elements.searchResults.style.display = 'none';
                     }
@@ -102,12 +119,107 @@ document.addEventListener('DOMContentLoaded', () => {
                 elements.searchResults.innerHTML = '';
                 elements.searchResults.style.display = 'none';
 
+                // 駅IDを保存
+                localStorage.setItem('rushRunnerLastStation', stationId);
+
+                // 方面セレクタを更新
+                this.populateDirectionSelector();
+
                 this.renderTimetable();
                 this.startCountdown();
+
+                // 運行情報の取得と表示更新
+                const railwayId = this.currentStation.line;
+                if (railwayId) {
+                    this.updateTrainInfo(railwayId);
+                } else {
+                    console.warn('Railway ID not found for station:', this.currentStation);
+                }
+
                 this.updateRushAlert();
             } catch (error) {
-                console.error("駅情報の取得に失敗しました:", error);
-                elements.stationName.textContent = "駅データ取得エラー";
+                console.error('Change station error:', error);
+                alert('駅データの読み込みに失敗しました。');
+            }
+        },
+
+        // --- 運行情報取得・表示 ---
+        async updateTrainInfo(railwayId) {
+            const container = document.getElementById('train-info-container') || this.createTrainInfoContainer();
+            container.innerHTML = '<span class="loading">運行情報確認中...</span>';
+            container.className = 'train-info'; // Reset class
+
+            try {
+                const res = await fetch(`/api/info?railway=${encodeURIComponent(railwayId)}`);
+                const data = await res.json();
+
+                if (data && data.length > 0) {
+                    const info = data[0];
+                    const statusText = info['odpt:trainInformationText']?.ja || '情報なし';
+                    container.textContent = `【運行情報】 ${statusText}`;
+
+                    // 単純なキーワード判定で色を変える
+                    if (statusText.includes('遅れ') || statusText.includes('見合わせ')) {
+                        container.classList.add('warning');
+                    } else if (statusText.includes('平常')) {
+                        container.classList.add('normal');
+                    }
+                } else {
+                    container.textContent = '運行情報: データなし';
+                }
+            } catch (e) {
+                console.error('Failed to fetch train info', e);
+                container.textContent = '運行情報: 取得失敗';
+            }
+        },
+
+        createTrainInfoContainer() {
+            const header = document.querySelector('header');
+            const div = document.createElement('div');
+            div.id = 'train-info-container';
+            div.className = 'train-info';
+            // ヘッダータイトルの下に挿入
+            header.insertBefore(div, header.querySelector('#station-info'));
+            return div;
+        },
+
+        // --- 方面セレクタ ---
+        populateDirectionSelector() {
+            elements.directionSelect.innerHTML = '';
+            const directions = this.currentStation.directions || [];
+
+            if (directions.length === 0) {
+                elements.directionSelect.style.display = 'none';
+                return;
+            }
+
+            elements.directionSelect.style.display = 'inline-block';
+
+            directions.forEach((dir, index) => {
+                const option = document.createElement('option');
+                option.value = dir;
+                // 方面名を日本語化（簡易マッピング）
+                const directionNames = {
+                    'Shibuya': '渋谷方面',
+                    'Asakusa': '浅草方面',
+                    'Ikebukuro': '池袋方面',
+                    'Ogikubo': '荻窪方面',
+                    'KitaSenju': '北千住方面',
+                    'NakaMeguro': '中目黒方面',
+                    'RailDirection:Eastbound': '東行',
+                    'RailDirection:Westbound': '西行'
+                };
+                option.textContent = directionNames[dir] || dir;
+                elements.directionSelect.appendChild(option);
+            });
+
+            // 保存された方面があれば選択
+            const savedDirection = localStorage.getItem('rushRunnerDirection');
+            if (savedDirection && directions.includes(savedDirection)) {
+                this.currentDirection = savedDirection;
+                elements.directionSelect.value = savedDirection;
+            } else {
+                this.currentDirection = directions[0];
             }
         },
 
@@ -115,7 +227,15 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTimetable() {
             elements.timetableBody.innerHTML = '';
             if (!this.currentStation) return;
-            const trains = this.currentStation.timetable[this.currentDayType];
+
+            // 方面別時刻表から現在の方面を取得
+            const timetableByDir = this.currentStation.timetableByDirection;
+            const currentTimetable = timetableByDir
+                ? timetableByDir[this.currentDirection]
+                : this.currentStation.timetable;
+
+            if (!currentTimetable) return;
+            const trains = currentTimetable[this.currentDayType];
             if (!trains) return;
 
             trains.forEach(train => {
@@ -135,7 +255,15 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCountdown() {
             if (!this.currentStation) return;
             const now = new Date();
-            const trains = this.currentStation.timetable[this.currentDayType];
+
+            // 方面別時刻表から現在の方面を取得
+            const timetableByDir = this.currentStation.timetableByDirection;
+            const currentTimetable = timetableByDir
+                ? timetableByDir[this.currentDirection]
+                : this.currentStation.timetable;
+
+            if (!currentTimetable) return;
+            const trains = currentTimetable[this.currentDayType];
 
             this.nextTrain = null;
             if (trains && trains.length > 0) {
@@ -153,7 +281,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 tomorrow.setDate(now.getDate() + 1);
                 const dayOfWeek = tomorrow.getDay();
                 const nextDayType = (dayOfWeek === 0 || dayOfWeek === 6) ? 'holiday' : 'weekday';
-                const nextDayTrains = this.currentStation.timetable[nextDayType];
+                const nextDayTimetable = timetableByDir
+                    ? timetableByDir[this.currentDirection]
+                    : this.currentStation.timetable;
+                const nextDayTrains = nextDayTimetable ? nextDayTimetable[nextDayType] : null;
 
                 if (nextDayTrains && nextDayTrains.length > 0) {
                     this.nextTrain = nextDayTrains[0];
@@ -253,13 +384,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const timeToWalk = distance / RUSH_ALERT_SPEEDS.walk;
             const timeToRun = distance / RUSH_ALERT_SPEEDS.run;
 
+            // 駅構内の移動時間を差し引く
+            const effectiveTime = timeToDeparture - (this.bufferTime * 60);
+
             let message = '';
             let alertClass = '';
 
-            if (timeToDeparture > timeToWalk + 60) {
+            if (effectiveTime > timeToWalk + 60) {
                 message = `🚶 余裕です！ (駅まで徒歩 約${Math.ceil(timeToWalk / 60)}分)`;
                 alertClass = 'safe';
-            } else if (timeToDeparture > timeToRun + 10) {
+            } else if (effectiveTime > timeToRun + 10) {
                 message = `🏃‍♂️ ダッシュで間に合うかも！ (駅まで走って 約${Math.ceil(timeToRun / 60)}分)`;
                 alertClass = 'warning';
             } else {
@@ -304,8 +438,39 @@ document.addEventListener('DOMContentLoaded', () => {
             this.toggleTimetable(savedState);
         },
 
+        loadSettings() {
+            this.bufferTime = parseInt(localStorage.getItem('rushRunnerBuffer') || '0', 10);
+            elements.bufferInput.value = this.bufferTime;
+        },
+
+        saveSettings() {
+            this.bufferTime = parseInt(elements.bufferInput.value || '0', 10);
+            localStorage.setItem('rushRunnerBuffer', this.bufferTime);
+            elements.settingsOverlay.style.display = 'none';
+            // 設定反映のためアラート更新をリセットして再実行
+            this._lastRushAlertUpdate = 0;
+            this.updateRushAlert();
+        },
+
         // --- イベントリスナー設定 ---
         setupEventListeners() {
+            elements.settingsToggle.addEventListener('click', () => {
+                elements.settingsOverlay.style.display = 'flex';
+            });
+
+            elements.saveSettings.addEventListener('click', () => this.saveSettings());
+            elements.closeSettings.addEventListener('click', () => {
+                elements.settingsOverlay.style.display = 'none';
+            });
+
+            // 方面セレクタの変更
+            elements.directionSelect.addEventListener('change', (e) => {
+                this.currentDirection = e.target.value;
+                localStorage.setItem('rushRunnerDirection', this.currentDirection);
+                this.renderTimetable();
+                this.startCountdown();
+            });
+
             elements.searchBox.addEventListener('input', (e) => {
                 this.searchStations(e.target.value);
             });
