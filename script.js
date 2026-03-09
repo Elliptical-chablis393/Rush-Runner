@@ -31,6 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
         timetableWrapper: document.querySelector('.timetable-wrapper'),
         timetableHeader: document.getElementById('timetable-header'),
         toggleIcon: document.querySelector('.toggle-icon'),
+        impressionInput: document.getElementById('impression-input'),
+        impressionButton: document.getElementById('impression-button'),
+        impressionResponse: document.getElementById('impression-response'),
     };
 
     // --- アプリケーション本体 ---
@@ -273,6 +276,35 @@ document.addEventListener('DOMContentLoaded', () => {
             this.toggleTimetable(savedState);
         },
 
+        updateImpressionResponse() {
+            if (!elements.impressionInput || !elements.impressionResponse) return;
+
+            const text = elements.impressionInput.value.trim();
+            if (!text) {
+                elements.impressionResponse.textContent = '感想を入力すると、印象に残っている視点をやさしく言い換えます。';
+                return;
+            }
+
+            const feedback = [];
+            if (/(未来|メタバース|令和|タブレット|アテンションエコノミー)/.test(text)) {
+                feedback.push('作品そのものだけでなく、技術や空気感から「今っぽさ」を拾えているのが鋭い感想です。');
+            }
+            if (/(テンポ|価値観)/.test(text)) {
+                feedback.push('テンポ感や価値観に注目しているので、設定や見た目以上に作品の手触りをちゃんと見ています。');
+            }
+            if (/(見た目女の子|男がいたり|高校でタブレット)/.test(text)) {
+                feedback.push('学校や人物の描写を通して、令和らしい生活感や多様性まで受け取れているのも良いポイントです。');
+            }
+
+            const parts = [
+                'かなり面白い感想だと思います。',
+                ...feedback,
+                '「面白かった」で終わらず、その作品が生まれた時代の進み方まで見ているところに、この感想の強みがあります。'
+            ];
+
+            elements.impressionResponse.textContent = parts.join(' ');
+        },
+
         // --- イベントリスナー設定 ---
         setupSearchListener() {
             elements.searchBox.addEventListener('input', () => {
@@ -317,6 +349,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             elements.timetableHeader.addEventListener('click', () => this.toggleTimetable());
+
+            if (elements.impressionButton) {
+                elements.impressionButton.addEventListener('click', () => this.updateImpressionResponse());
+                this.updateImpressionResponse();
+            }
 
             // --- 試験用ボタン ---
             elements.debugSafe.addEventListener('click', () => this.showRushAlert(200, 600));

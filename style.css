@@ -408,17 +408,99 @@ body.theme-led {
     overflow: hidden;
 }
 
+#impression-checker {
+    margin-top: 24px;
+    display: grid;
+    gap: 12px;
+}
+
+#impression-checker h3 {
+    margin: 0;
+}
+
+#impression-input {
+    width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+    padding: 12px;
+    font: inherit;
+    line-height: 1.6;
+}
+
+#impression-button {
+    justify-self: start;
+    padding: 10px 16px;
+    border: none;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+}
+
+#impression-response {
+    margin: 0;
+    line-height: 1.8;
+}
+
 /* 各テーマの時刻表コンテナの調整 */
 .theme-light .timetable-container {
     border: 1px solid #e0e5ea;
+}
+
+.theme-light #impression-input {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9fafb;
+    color: #333;
+}
+
+.theme-light #impression-button {
+    border-radius: 8px;
+    background-color: #007aff;
+    color: #fff;
+}
+
+.theme-light #impression-response {
+    color: #334155;
 }
 
 .theme-dark .timetable-container {
     border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
+.theme-dark #impression-input {
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.2);
+    color: #f0f0f0;
+}
+
+.theme-dark #impression-button {
+    border-radius: 8px;
+    background-color: #00dec8;
+    color: #000;
+}
+
+.theme-dark #impression-response {
+    color: #d3d8e1;
+}
+
 .theme-led .timetable-container {
     border: 1px solid #333;
+}
+
+.theme-led #impression-input {
+    border: 1px solid #444;
+    background-color: #222;
+    color: #e5e5e5;
+}
+
+.theme-led #impression-button {
+    background-color: #ff8c00;
+    color: #000;
+}
+
+.theme-led #impression-response {
+    color: #ffcf85;
 }
 
 /*
@@ -512,3 +594,21 @@ body.theme-nerv {
 .theme-nerv #timetable th, .theme-nerv #timetable td { border-bottom: 1px solid #ff0000; }
 .theme-nerv #timetable th { color: #ff0000; text-transform: uppercase; }
 .theme-nerv #timetable tbody tr:hover { background-color: #330000; }
+.theme-nerv #impression-input {
+    border: 1px solid #ff0000;
+    border-radius: 0;
+    background-color: #111;
+    color: #fff;
+    font-family: 'Orbitron', 'Noto Sans JP', sans-serif;
+}
+
+.theme-nerv #impression-button {
+    border-radius: 0;
+    background-color: #ff0000;
+    color: #000;
+    font-family: 'Orbitron', 'Noto Sans JP', sans-serif;
+}
+
+.theme-nerv #impression-response {
+    color: #fff;
+}
