@@ -570,6 +570,13 @@ body.theme-nerv {
     font-family: 'Roboto Mono', monospace;
 }
 
+.math-block {
+    overflow-x: auto;
+    padding: 16px;
+    border-radius: 10px;
+    margin: 16px 0;
+}
+
 .insight-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -587,24 +594,28 @@ body.theme-nerv {
 }
 
 .theme-light .article-content pre,
+.theme-light .math-block,
 .theme-light .insight-grid article {
     background: #f9fafb;
     border: 1px solid #e0e5ea;
 }
 
 .theme-dark .article-content pre,
+.theme-dark .math-block,
 .theme-dark .insight-grid article {
     background: rgba(0, 0, 0, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .theme-led .article-content pre,
+.theme-led .math-block,
 .theme-led .insight-grid article {
     background: #222;
     border: 1px solid #333;
 }
 
 .theme-nerv .article-content pre,
+.theme-nerv .math-block,
 .theme-nerv .insight-grid article {
     background: rgba(255, 0, 0, 0.06);
     border: 1px solid #ff0000;

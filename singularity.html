@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>特異点・地政学論考 | RushRunner</title>
+    <title>技術的特異点・地政学論考 | RushRunner</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@400;500;700&family=Roboto+Mono:wght@700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="theme-light article-page">
     <div class="container article-container">
         <header>
-            <h1>ギュ（技術的特異点）到来メカニズムと地政学的再編</h1>
+            <h1>技術的特異点（Singularity）到来メカニズムと地政学的再編</h1>
             <p class="description">再帰的自己改善、歴史比較、Pythonシミュレーション、複数経路推論を1ページに統合した論考</p>
             <p class="secondary-link"><a href="index.html">RushRunner に戻る</a></p>
         </header>
@@ -21,7 +22,8 @@
             <section>
                 <h2>1. 問題設定</h2>
                 <p>
-                    本論考では、「現在の推論時計算量のスケーリングだけでは収穫逓減が強いが、AIエージェントが自らのモデル設計・学習過程・
+                    本論考では、問題文中で「ギュ」と呼ばれている技術的特異点（Singularity）について、
+                    「現在の推論時計算量のスケーリングだけでは収穫逓減が強いが、AIエージェントが自らのモデル設計・学習過程・
                     計算資源配分を改善できるなら、どの条件で再帰的自己改善（RSI）が加速し、技術的特異点に似た急峻な知能増幅が起こり得るか」を、
                     計算機科学と政治経済学の両面から整理する。
                 </p>
@@ -32,18 +34,21 @@
                 <p>
                     まず、通常の推論スケーリングが「計算量を増やせば性能も上がるが、追加1単位あたりの改善幅は小さくなる」状況を定義する。
                     その単純化モデルとして、性能指標 \(P\) を推論計算量 \(C\) の関数として次で置く。
+                    ここで \(P_{\max}\) は理論上の性能上限、\(A\) は初期改善余地、\(C_0\) は小規模計算領域での滑らかさを与える定数である。
                 </p>
-                <pre><code>\[
+                <div class="math-block">
+\[
 P(C) = P_{\max} - \frac{A}{(C + C_0)^\alpha},
 \qquad
-\alpha &gt; 0
+\alpha > 0
 \]
 
 \[
 \frac{dP}{dC} = \frac{\alpha A}{(C + C_0)^{\alpha + 1}},
 \qquad
-\frac{d^2P}{dC^2} = - \frac{\alpha(\alpha+1)A}{(C + C_0)^{\alpha + 2}} &lt; 0
-\]</code></pre>
+\frac{d^2P}{dC^2} = - \frac{\alpha(\alpha+1)A}{(C + C_0)^{\alpha + 2}} < 0
+\]
+                </div>
                 <p>
                     二階微分が負であるため、追加計算資源による限界効用は逓減する。これが現在の「推論時にトークンやサンプルを増やすほど正答率は上がるが、
                     伸びは鈍る」という直観に対応する。
@@ -53,18 +58,21 @@ P(C) = P_{\max} - \frac{A}{(C + C_0)^\alpha},
                     モデル能力 \(I_t\)、アルゴリズム効率 \(A_t\)、利用可能計算資源 \(H_t\)、有効データ量 \(D_t\) とすると、
                     有効知能を次で表せる。
                 </p>
-                <pre><code>\[
+                <div class="math-block">
+\[
 I_t = \Phi(A_t, H_t, D_t, G_t)
 \]
 
 \[
 G_t = g_1(\text{architecture}_t) + g_2(\text{optimizer}_t) + g_3(\text{tool\_use}_t) + g_4(\text{automation}_t)
-\]</code></pre>
+\]
+                </div>
                 <p>
                     ここで \(G_t\) は「同じ計算資源でも、より良い探索・圧縮・外部ツール利用・実験自動化により得られる追加利得」である。
                     RSIの核は、時刻 \(t\) の知能 \(I_t\) が次時刻の改善率そのものを押し上げる点にある。
                 </p>
-                <pre><code>\[
+                <div class="math-block">
+\[
 \frac{dA}{dt} = \eta_A I^\beta \left(1 - \frac{A}{A_{\max}}\right)
 \]
 
@@ -83,7 +91,8 @@ G_t = g_1(\text{architecture}_t) + g_2(\text{optimizer}_t) + g_3(\text{tool\_use
 + \underbrace{\kappa_3 A}_{\text{アルゴリズム効率}}
 + \underbrace{\kappa_4 I^\beta A}_{\text{自己改善の再帰項}}
 - \underbrace{\kappa_5 I^2 / K}_{\text{安定化・飽和項}}
-\]</code></pre>
+\]
+                </div>
                 <p>
                     この系では、単純な推論スケーリングの限界は \(\log(1+H)\) や \(\log(1+D)\) により収穫逓減を示す一方、
                     RSI項 \(\kappa_4 I^\beta A\) が十分大きくなると、性能向上の主因が「より多い計算」から
@@ -156,10 +165,19 @@ class Bloc:
     energy_security: float
     monopoly_access: float = 0.0
 
-def clamp(value: float, floor: float = 0.0) -&gt; float:
+# Modeled year when the leading bloc secures a durable AGI advantage.
+MONOPOLY_SHOCK_YEAR = 5
+# Strong but not absolute monopoly coefficient for the AGI-leading bloc.
+MONOPOLY_ACCESS_LEVEL = 0.8
+# Baseline geopolitical tension floor.
+GLOBAL_PRESSURE_BASE = 1.0
+# Penalty multiplier that maps average military buildup to compute friction.
+GLOBAL_PRESSURE_MILITARY_MULTIPLIER = 0.08
+
+def clamp(value: float, floor: float = 0.0) -> float:
     return max(floor, value)
 
-def step_bloc(bloc: Bloc, global_pressure: float, params: dict, dt: float = 1.0) -&gt; None:
+def step_bloc(bloc: Bloc, global_pressure: float, params: dict[str, float], dt: float = 1.0) -> None:
     # RSI項: 知能が高いほど、次の知能改善率も増える
     rsi_term = params["rsi_gain"] * (bloc.intelligence ** params["rsi_exponent"]) * (1.0 + bloc.monopoly_access)
     # 推論スケーリングは対数項で収穫逓減を表す
@@ -181,7 +199,7 @@ def step_bloc(bloc: Bloc, global_pressure: float, params: dict, dt: float = 1.0)
     ) * dt
     d_military = (
         params["military_gain"] * bloc.intelligence
-        + params["military_gain"] * 0.5 * bloc.economy
+        + 0.5 * params["military_gain"] * bloc.economy
         - params["military_decay"] * bloc.military
     ) * dt
 
@@ -190,7 +208,7 @@ def step_bloc(bloc: Bloc, global_pressure: float, params: dict, dt: float = 1.0)
     bloc.economy = clamp(bloc.economy + d_economy)
     bloc.military = clamp(bloc.military + d_military)
 
-def simulate(years: int = 25):
+def simulate(years: int = 25) -> list[dict[str, float]]:
     params = {
         "rsi_gain": 0.014,
         "rsi_exponent": 1.18,
@@ -208,17 +226,17 @@ def simulate(years: int = 25):
     }
 
     blocs = [
-        Bloc("Leader", 9.0, 10.0, 8.0, 7.0, 0.88, 0.90, monopoly_access=0.0),
-        Bloc("Rival", 7.5, 8.0, 7.8, 7.4, 0.80, 0.78, monopoly_access=0.0),
-        Bloc("Followers", 4.5, 3.8, 4.2, 3.7, 0.62, 0.70, monopoly_access=0.0),
+        Bloc("Leader", intelligence=9.0, compute=10.0, economy=8.0, military=7.0, institutions=0.88, energy_security=0.90),
+        Bloc("Rival", intelligence=7.5, compute=8.0, economy=7.8, military=7.4, institutions=0.80, energy_security=0.78),
+        Bloc("Followers", intelligence=4.5, compute=3.8, economy=4.2, military=3.7, institutions=0.62, energy_security=0.70),
     ]
 
     history = []
     for year in range(years):
-        if year &gt;= 5:
-            blocs[0].monopoly_access = 0.8  # AGI独占が発生するショック
+        if year >= MONOPOLY_SHOCK_YEAR:
+            blocs[0].monopoly_access = MONOPOLY_ACCESS_LEVEL
 
-        global_pressure = 1.0 + 0.08 * sum(bloc.military for bloc in blocs) / len(blocs)
+        global_pressure = GLOBAL_PRESSURE_BASE + GLOBAL_PRESSURE_MILITARY_MULTIPLIER * sum(bloc.military for bloc in blocs) / len(blocs)
         for bloc in blocs:
             step_bloc(bloc, global_pressure, params)
 

@@ -9,6 +9,15 @@ from __future__ import annotations
 from dataclasses import dataclass
 import math
 
+# Modeled year when the leading bloc secures a durable AGI advantage.
+MONOPOLY_SHOCK_YEAR = 5
+# Strong but not absolute monopoly coefficient for the AGI-leading bloc.
+MONOPOLY_ACCESS_LEVEL = 0.8
+# Baseline geopolitical tension floor.
+GLOBAL_PRESSURE_BASE = 1.0
+# Penalty multiplier that maps average military buildup to compute friction.
+GLOBAL_PRESSURE_MILITARY_MULTIPLIER = 0.08
+
 
 @dataclass
 class Bloc:
@@ -32,6 +41,9 @@ def clamp(value: float, floor: float = 0.0) -> float:
 
 def step_bloc(bloc: Bloc, global_pressure: float, params: dict[str, float], dt: float = 1.0) -> None:
     """Advance one bloc by one Euler step.
+
+    This function mutates the provided ``bloc`` in place instead of returning
+    a copied next state.
 
     Parameters are tuned for qualitative behavior only:
     - rsi_gain / rsi_exponent: strength of recursive self-improvement
@@ -70,7 +82,16 @@ def step_bloc(bloc: Bloc, global_pressure: float, params: dict[str, float], dt: 
 
 
 def simulate(years: int = 25) -> list[dict[str, float]]:
-    """Run the scenario and return a compact history table."""
+    """Run the scenario and return a compact history table.
+
+    Each row includes:
+    - year
+    - leader_intelligence
+    - rival_intelligence
+    - leader_gap
+    - compute_gap
+    - military_gap
+    """
 
     params = {
         "rsi_gain": 0.014,
@@ -96,10 +117,12 @@ def simulate(years: int = 25) -> list[dict[str, float]]:
 
     history: list[dict[str, float]] = []
     for year in range(years):
-        if year >= 5:
-            blocs[0].monopoly_access = 0.8
+        if year >= MONOPOLY_SHOCK_YEAR:
+            blocs[0].monopoly_access = MONOPOLY_ACCESS_LEVEL
 
-        global_pressure = 1.0 + 0.08 * sum(bloc.military for bloc in blocs) / len(blocs)
+        # Global military tension rises with average military strength and slightly
+        # reduces the efficiency of compute scaling through sanctions and rivalry.
+        global_pressure = GLOBAL_PRESSURE_BASE + GLOBAL_PRESSURE_MILITARY_MULTIPLIER * sum(bloc.military for bloc in blocs) / len(blocs)
         for bloc in blocs:
             step_bloc(bloc, global_pressure, params)
 
